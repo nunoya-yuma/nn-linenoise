@@ -8,6 +8,8 @@
 #include "linenoise.h"
 
 static int s_async;
+static NN_LinenoiseRegisterCommand_t s_registered_command_list[NN_LINENOISE_MAX_COMMAND_NUM];
+static int s_current_registered_cmd_num;
 
 void completion(const char *buf, linenoiseCompletions *lc)
 {
@@ -15,6 +17,10 @@ void completion(const char *buf, linenoiseCompletions *lc)
     {
         linenoiseAddCompletion(lc, "hello");
         linenoiseAddCompletion(lc, "hello there");
+    }
+    else if (buf[0] == 's')
+    {
+        linenoiseAddCompletion(lc, "sample-status");
     }
 }
 
@@ -29,11 +35,58 @@ char *hints(const char *buf, int *color, int *bold)
     return NULL;
 }
 
+static void CallRegisteredCommand(const char *a_command)
+{
+    bool is_found = false;
+    for (int i = 0; i < s_current_registered_cmd_num; i++)
+    {
+        if (strncmp(a_command, s_registered_command_list[i].m_command_name, strlen(a_command)) == 0)
+        {
+            const char *args[] = {a_command};
+            if (s_registered_command_list[i].m_func(1, (char **)args))
+            {
+                printf("%s: %s\n", s_registered_command_list[i].m_command_name, s_registered_command_list[i].m_help_msg);
+            }
+            is_found = true;
+            break;
+        }
+    }
+
+    if (!is_found)
+    {
+        printf("Invalid command: '%s'\n", a_command);
+    }
+}
+
 /**
  *
  * Public functions
  *
  */
+
+int NN_LinenoiseRegisterCommand(const NN_LinenoiseRegisterCommand_t *a_cmd)
+{
+    int res = 0;
+    if (s_current_registered_cmd_num >= NN_LINENOISE_MAX_COMMAND_NUM)
+    {
+        printf("[NN_Linenoise] Error: The maximum number of commands that can be registered has been exceeded\n");
+        res = 1;
+        goto done;
+    }
+
+    if (a_cmd == NULL || a_cmd->m_func == NULL || a_cmd->m_command_name == NULL || a_cmd->m_help_msg == NULL)
+    {
+        printf("[NN_Linenoise] Error: An invalid command was attempted to be registered\n");
+        res = 2;
+        goto done;
+    }
+
+    memcpy(&s_registered_command_list[s_current_registered_cmd_num], a_cmd, sizeof(NN_LinenoiseRegisterCommand_t));
+    s_current_registered_cmd_num++;
+
+done:
+    return res;
+}
 
 int NN_LinenoiseInit(int argc, char **argv)
 {
@@ -68,7 +121,7 @@ int NN_LinenoiseInit(int argc, char **argv)
     /* Set the completion callback. This will be called every time the
      * user uses the <tab> key. */
     linenoiseSetCompletionCallback(completion);
-    linenoiseSetHintsCallback(hints);
+    // linenoiseSetHintsCallback(hints);
 
     /* Load history from file. The history file is just a plain text file
      * where entries are separated by newlines. */
@@ -155,7 +208,7 @@ int NN_LinenoiseRun(void)
     /* Do something with the string. */
     if (line[0] != '\0' && line[0] != '/')
     {
-        printf("echo: '%s'\n", line);
+        CallRegisteredCommand(line);
         linenoiseHistoryAdd(line);                /* Add to the history. */
         linenoiseHistorySave("/tmp/history.txt"); /* Save the history on disk. */
     }
