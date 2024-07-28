@@ -1,6 +1,15 @@
 #include <stdio.h>
 
-int main(void)
+#include "nn_linenoise.h"
+
+int main(int argc, char **argv)
 {
-    printf("[NN] %s:%d\n", __FILE__, __LINE__);
+    NN_LinenoiseInit(argc, argv);
+
+    while (!NN_LinenoiseRun())
+    {
+        /* do nothing */
+    }
+
+    return 0;
 }
