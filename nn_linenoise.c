@@ -7,6 +7,9 @@
 #include <sys/select.h>
 #include "linenoise.h"
 
+#define MAX_NUM_OF_WORDS_PER_COMMAND 20
+#define COMMAND_STRING_MAX_LEN 1024
+
 static int s_async;
 static NN_LinenoiseRegisterCommand_t s_registered_command_list[NN_LINENOISE_MAX_COMMAND_NUM];
 static int s_current_registered_cmd_num;
@@ -35,17 +38,38 @@ char *hints(const char *buf, int *color, int *bold)
     return NULL;
 }
 
+static int SplitStringWithSpace(const char *a_raw_command, char **out_tokens)
+{
+    static char strCopy[COMMAND_STRING_MAX_LEN];
+    strncpy(strCopy, a_raw_command, sizeof(strCopy) - 1);
+    strCopy[sizeof(strCopy) - 1] = '\0';
+
+    int tokenCount = 0;
+    char *context = NULL;
+    char *token = strtok_r(strCopy, " ", &context);
+
+    while (token != NULL && tokenCount < MAX_NUM_OF_WORDS_PER_COMMAND)
+    {
+        out_tokens[tokenCount++] = token;
+        token = strtok_r(NULL, " ", &context);
+    }
+
+    return tokenCount;
+}
+
 static void CallRegisteredCommand(const char *a_command)
 {
     bool is_found = false;
     for (int i = 0; i < s_current_registered_cmd_num; i++)
     {
-        if (strncmp(a_command, s_registered_command_list[i].m_command_name, strlen(a_command)) == 0)
+        char *args[MAX_NUM_OF_WORDS_PER_COMMAND];
+        int argc = SplitStringWithSpace(a_command, args);
+        const char *first_command = args[0];
+        if (strncmp(first_command, s_registered_command_list[i].m_command_name, strlen(first_command)) == 0)
         {
-            const char *args[] = {a_command};
-            if (s_registered_command_list[i].m_func(1, (char **)args))
+            if (s_registered_command_list[i].m_func(argc, args))
             {
-                printf("%s: %s\n", s_registered_command_list[i].m_command_name, s_registered_command_list[i].m_help_msg);
+                printf("\n[Usage]\n%s | %s\n", s_registered_command_list[i].m_command_name, s_registered_command_list[i].m_help_msg);
             }
             is_found = true;
             break;
