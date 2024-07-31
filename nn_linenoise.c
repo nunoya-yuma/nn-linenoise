@@ -16,14 +16,20 @@ static int s_current_registered_cmd_num;
 
 void completion(const char *buf, linenoiseCompletions *lc)
 {
-    if (buf[0] == 'h')
+    bool found = false;
+    for (int i = 0; i < s_current_registered_cmd_num; i++)
     {
-        linenoiseAddCompletion(lc, "hello");
-        linenoiseAddCompletion(lc, "hello there");
+        if (strncmp(buf, s_registered_command_list[i].m_command_name, strlen(buf)) == 0)
+        {
+            linenoiseAddCompletion(lc, s_registered_command_list[i].m_command_name);
+            found = true;
+        }
     }
-    else if (buf[0] == 's')
+
+    // If no candidate command exists, leave it as is and do not add a space by tab.
+    if (!found)
     {
-        linenoiseAddCompletion(lc, "sample-status");
+        linenoiseAddCompletion(lc, buf);
     }
 }
 
