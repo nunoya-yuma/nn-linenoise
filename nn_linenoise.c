@@ -19,9 +19,9 @@ void completion(const char *buf, linenoiseCompletions *lc)
     bool found = false;
     for (int i = 0; i < s_current_registered_cmd_num; i++)
     {
-        if (strncmp(buf, s_registered_command_list[i].m_command_name, strlen(buf)) == 0)
+        if (strncmp(buf, s_registered_command_list[i].m_name, strlen(buf)) == 0)
         {
-            linenoiseAddCompletion(lc, s_registered_command_list[i].m_command_name);
+            linenoiseAddCompletion(lc, s_registered_command_list[i].m_name);
             found = true;
         }
     }
@@ -71,11 +71,11 @@ static void CallRegisteredCommand(const char *a_command)
         char *args[MAX_NUM_OF_WORDS_PER_COMMAND];
         int argc = SplitStringWithSpace(a_command, args);
         const char *first_command = args[0];
-        if (strncmp(first_command, s_registered_command_list[i].m_command_name, strlen(first_command)) == 0)
+        if (strncmp(first_command, s_registered_command_list[i].m_name, strlen(first_command)) == 0)
         {
             if (s_registered_command_list[i].m_func(argc, args))
             {
-                printf("\n[Usage]\n%s | %s\n", s_registered_command_list[i].m_command_name, s_registered_command_list[i].m_help_msg);
+                printf("\n[Usage]\n%s | %s\n", s_registered_command_list[i].m_name, s_registered_command_list[i].m_help_msg);
             }
             is_found = true;
             break;
@@ -104,7 +104,7 @@ int NN_LinenoiseRegisterCommand(const NN_LinenoiseRegisterCommand_t *a_cmd)
         goto done;
     }
 
-    if (a_cmd == NULL || a_cmd->m_func == NULL || a_cmd->m_command_name == NULL || a_cmd->m_help_msg == NULL)
+    if (a_cmd == NULL || a_cmd->m_func == NULL || a_cmd->m_name == NULL || a_cmd->m_help_msg == NULL)
     {
         printf("[NN_Linenoise] Error: An invalid command was attempted to be registered\n");
         res = 2;
