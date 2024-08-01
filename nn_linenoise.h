@@ -10,6 +10,7 @@ typedef struct
 {
     NN_LinenoiseCommand_t m_func;
     const char *m_name;
+    const char *m_options;
     const char *m_help_msg;
 } NN_LinenoiseRegisterCommand_t;
 

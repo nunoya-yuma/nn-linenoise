@@ -98,7 +98,8 @@ int main(int argc, char **argv)
     NN_LinenoiseRegisterCommand_t sample_status_cmd_config = {
         .m_func = Sample_ShowStatusCmd,
         .m_name = "sample-status",
-        .m_help_msg = "Show current sample status: <ON/OFF>",
+        .m_options = NULL,
+        .m_help_msg = "Show current sample status: <on/off>",
     };
 
     if (NN_LinenoiseRegisterCommand(&sample_status_cmd_config))
@@ -109,6 +110,7 @@ int main(int argc, char **argv)
     NN_LinenoiseRegisterCommand_t sample_ctrl_cmd_config = {
         .m_func = Sample_CtrlCmd,
         .m_name = "sample-ctrl",
+        .m_options = "on/off",
         .m_help_msg = "Change sample status: <on/off>",
     };
 

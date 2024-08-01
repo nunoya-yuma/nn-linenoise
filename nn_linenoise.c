@@ -35,13 +35,29 @@ void completion(const char *buf, linenoiseCompletions *lc)
 
 char *hints(const char *buf, int *color, int *bold)
 {
-    if (!strcasecmp(buf, "hello"))
+    static char option_str[COMMAND_STRING_MAX_LEN];
+    memset(option_str, 0, sizeof(option_str));
+
+    *color = 35;
+    *bold = 0;
+
+    for (int i = 0; i < s_current_registered_cmd_num; i++)
     {
-        *color = 35;
-        *bold = 0;
-        return " World";
+        if (s_registered_command_list[i].m_options == NULL)
+        {
+            continue;
+        }
+
+        if (strcmp(buf, s_registered_command_list[i].m_name) == 0)
+        {
+            option_str[0] = ' ';
+            // 2 byte (subtracted at the end ) = 1 byte (for the first move) + 1 byte (of the last null character)
+            strncpy(&option_str[1], s_registered_command_list[i].m_options, sizeof(option_str) - 2);
+            break;
+        }
     }
-    return NULL;
+
+    return option_str;
 }
 
 static int SplitStringWithSpace(const char *a_raw_command, char **out_tokens)
@@ -104,6 +120,7 @@ int NN_LinenoiseRegisterCommand(const NN_LinenoiseRegisterCommand_t *a_cmd)
         goto done;
     }
 
+    // Allow m_options to be NULL.
     if (a_cmd == NULL || a_cmd->m_func == NULL || a_cmd->m_name == NULL || a_cmd->m_help_msg == NULL)
     {
         printf("[NN_Linenoise] Error: An invalid command was attempted to be registered\n");
@@ -151,7 +168,7 @@ int NN_LinenoiseInit(int argc, char **argv)
     /* Set the completion callback. This will be called every time the
      * user uses the <tab> key. */
     linenoiseSetCompletionCallback(completion);
-    // linenoiseSetHintsCallback(hints);
+    linenoiseSetHintsCallback(hints);
 
     /* Load history from file. The history file is just a plain text file
      * where entries are separated by newlines. */
