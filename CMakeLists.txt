@@ -1,6 +1,6 @@
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL "${CMAKE_SOURCE_DIR}")
     cmake_minimum_required(VERSION 3.14)
-    project(nn_linenoise_project)
+    project(nn_cli_project)
 
     # GoogleTest requires at least C++14
     set(CMAKE_CXX_STANDARD 14)
@@ -9,16 +9,16 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL "${CMAKE_SOURCE_DIR}")
     option(BUILD_TESTING "Build the tests" ON)
 endif()
 
-add_library(nn_linenoise
+add_library(nn_cli
     STATIC
-    nn_linenoise.c
+    nn_cli.c
 )
 
-target_link_libraries(nn_linenoise
+target_link_libraries(nn_cli
     linenoise_org
 )
 
-target_include_directories(nn_linenoise
+target_include_directories(nn_cli
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
 )

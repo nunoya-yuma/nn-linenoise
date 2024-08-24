@@ -1,4 +1,4 @@
-#include "nn_linenoise.h"
+#include "nn_cli.h"
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -11,7 +11,7 @@
 #define COMMAND_STRING_MAX_LEN 1024
 
 static int s_async;
-static NN_LinenoiseRegisterCommand_t s_registered_command_list[NN_LINENOISE_MAX_COMMAND_NUM];
+static NNCli_Register_t s_registered_command_list[NN_CLI__MAX_COMMAND_NUM];
 static int s_current_registered_cmd_num;
 
 void completion(const char *buf, linenoiseCompletions *lc)
@@ -110,33 +110,35 @@ static void CallRegisteredCommand(const char *a_command)
  *
  */
 
-int NN_LinenoiseRegisterCommand(const NN_LinenoiseRegisterCommand_t *a_cmd)
+NNCli_Err_t NNCli_RegisterCommand(const NNCli_Register_t *a_cmd)
 {
-    int res = 0;
-    if (s_current_registered_cmd_num >= NN_LINENOISE_MAX_COMMAND_NUM)
-    {
-        printf("[NN_Linenoise] Error: The maximum number of commands that can be registered has been exceeded\n");
-        res = 1;
-        goto done;
-    }
+    NNCli_Err_t res = NN_CLI__SUCCESS;
 
     // Allow m_options to be NULL.
     if (a_cmd == NULL || a_cmd->m_func == NULL || a_cmd->m_name == NULL || a_cmd->m_help_msg == NULL)
     {
         printf("[NN_Linenoise] Error: An invalid command was attempted to be registered\n");
-        res = 2;
+        res = NN_CLI__INVALID_ARGS;
         goto done;
     }
 
-    memcpy(&s_registered_command_list[s_current_registered_cmd_num], a_cmd, sizeof(NN_LinenoiseRegisterCommand_t));
+    if (s_current_registered_cmd_num >= NN_CLI__MAX_COMMAND_NUM)
+    {
+        printf("[NN_Linenoise] Error: The maximum number of commands that can be registered has been exceeded\n");
+        res = NN_CLI__EXCEED_CAPACITY;
+        goto done;
+    }
+
+    memcpy(&s_registered_command_list[s_current_registered_cmd_num], a_cmd, sizeof(NNCli_Register_t));
     s_current_registered_cmd_num++;
 
 done:
     return res;
 }
 
-int NN_LinenoiseInit(int argc, char **argv)
+NNCli_Err_t NNCli_Init(int argc, char **argv)
 {
+    NNCli_Err_t res = NN_CLI__SUCCESS;
     char *prgname = argv[0];
 
     /* Parse options, with --multiline we enable multi line editing. */
@@ -172,7 +174,12 @@ int NN_LinenoiseInit(int argc, char **argv)
 
     /* Load history from file. The history file is just a plain text file
      * where entries are separated by newlines. */
-    linenoiseHistoryLoad("/tmp/history.txt"); /* Load the history at startup */
+    if (linenoiseHistoryLoad("/tmp/history.txt"))
+    {
+        res = NN_CLI__EXTERNAL_LIB_ERROR;
+    }
+
+    return res;
 }
 
 /* Now this is the main loop of the typical linenoise-based application.
@@ -181,16 +188,16 @@ int NN_LinenoiseInit(int argc, char **argv)
  *
  * The typed string is returned as a malloc() allocated string by
  * linenoise, so the user needs to free() it. */
-int NN_LinenoiseRun(void)
+NNCli_Err_t NNCli_Run(void)
 {
-    int err = 0;
+    NNCli_Err_t err = NN_CLI__SUCCESS;
     char *line;
     if (!s_async)
     {
         line = linenoise("> ");
         if (line == NULL)
         {
-            err = 1;
+            err = NN_CLI__PROCESS_COMPLETED;
             goto done;
         }
     }
