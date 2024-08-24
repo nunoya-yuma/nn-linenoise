@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "nn_linenoise.h"
+#include "nn_cli.h"
 
 typedef enum
 {
@@ -95,33 +95,33 @@ done:
 
 int main(int argc, char **argv)
 {
-    NN_LinenoiseRegisterCommand_t sample_status_cmd_config = {
+    NNCli_Register_t sample_status_cmd_config = {
         .m_func = Sample_ShowStatusCmd,
         .m_name = "sample-status",
         .m_options = NULL,
         .m_help_msg = "Show current sample status: <on/off>",
     };
 
-    if (NN_LinenoiseRegisterCommand(&sample_status_cmd_config))
+    if (NNCli_RegisterCommand(&sample_status_cmd_config) != NN_CLI__SUCCESS)
     {
         return -1;
     }
 
-    NN_LinenoiseRegisterCommand_t sample_ctrl_cmd_config = {
+    NNCli_Register_t sample_ctrl_cmd_config = {
         .m_func = Sample_CtrlCmd,
         .m_name = "sample-ctrl",
         .m_options = "on/off",
         .m_help_msg = "Change sample status: <on/off>",
     };
 
-    if (NN_LinenoiseRegisterCommand(&sample_ctrl_cmd_config))
+    if (NNCli_RegisterCommand(&sample_ctrl_cmd_config) != NN_CLI__SUCCESS)
     {
         return -1;
     }
 
-    NN_LinenoiseInit(argc, argv);
+    NNCli_Init(argc, argv);
 
-    while (!NN_LinenoiseRun())
+    while (NNCli_Run() == NN_CLI__SUCCESS)
     {
         /* do nothing */
     }

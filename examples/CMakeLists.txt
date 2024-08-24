@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(NN_linenoise)
+project(nn_example)
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -11,7 +11,7 @@ set_target_properties(nn_cli_sample PROPERTIES
 )
 
 target_link_libraries(nn_cli_sample
-    nn_linenoise
+    nn_cli
 )
 
 add_subdirectory(nn-linenoise)

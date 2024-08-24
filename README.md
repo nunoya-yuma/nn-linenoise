@@ -3,7 +3,7 @@
 ## Setup
 
 ```shell
-git clone git@github.com:nunoya-yuma/nn_linenoise.git
+git clone git@github.com:nunoya-yuma/nn-linenoise.git
 git submodule update --init
 ```
 
