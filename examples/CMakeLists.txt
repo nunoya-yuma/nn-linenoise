@@ -15,3 +15,9 @@ target_link_libraries(nn_cli_sample
 )
 
 add_subdirectory(nn-linenoise)
+
+# Provide nn_cli_config.h for nn_cli
+target_include_directories(nn_cli
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
