@@ -1,10 +1,30 @@
 #include <gtest/gtest.h>
 
-// Demonstrate some basic assertions.
-TEST(HelloTest, BasicAssertions)
+#include "nn_cli.h"
+
+namespace
 {
-    // Expect two strings not to be equal.
-    EXPECT_STRNE("hello", "world");
-    // Expect equality.
-    EXPECT_EQ(7 * 6, 42);
+    int TestCmdFunc(int argc, char **argv)
+    {
+        // Nothing to do
+        return 0;
+    }
 }
+
+namespace testing
+{
+    TEST(NNCliTest, RegisterCommand)
+    {
+        const NNCli_Register_t cmd = {
+            /* .m_func = */ TestCmdFunc,
+            /* .m_name = */ "test-cmd",
+            /* .m_help_msg = */ "test help msg",
+            /* .m_options = */ "",
+        };
+
+        EXPECT_EQ(NNCli_RegisterCommand(&cmd), NN_CLI__SUCCESS);
+
+        EXPECT_EQ(NNCli_RegisterCommand(nullptr), NN_CLI__INVALID_ARGS);
+    }
+
+} // testing

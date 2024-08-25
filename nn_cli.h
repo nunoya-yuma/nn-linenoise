@@ -20,6 +20,15 @@ typedef enum
     NN_CLI__PROCESS_COMPLETED,  // This indicates that the process has been completed, but it may have been completed successfully.
 } NNCli_Err_t;
 
-NNCli_Err_t NNCli_RegisterCommand(const NNCli_Register_t *a_cmd);
-NNCli_Err_t NNCli_Init(int argc, char **argv);
-NNCli_Err_t NNCli_Run(void);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    NNCli_Err_t NNCli_RegisterCommand(const NNCli_Register_t *a_cmd);
+    NNCli_Err_t NNCli_Init(int argc, char **argv);
+    NNCli_Err_t NNCli_Run(void);
+
+#ifdef __cplusplus
+}
+#endif
