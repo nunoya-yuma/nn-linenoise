@@ -16,7 +16,7 @@ static int s_async;
 static NNCli_Register_t s_registered_command_list[NN_CLI__MAX_COMMAND_NUM];
 static int s_current_registered_cmd_num;
 
-void completion(const char *buf, linenoiseCompletions *lc)
+static void completion(const char *buf, linenoiseCompletions *lc)
 {
     NNCli_Assert(buf);
     NNCli_Assert(lc);
@@ -38,7 +38,7 @@ void completion(const char *buf, linenoiseCompletions *lc)
     }
 }
 
-char *hints(const char *buf, int *color, int *bold)
+static char *hints(const char *buf, int *color, int *bold)
 {
     NNCli_Assert(buf);
     NNCli_Assert(color);
