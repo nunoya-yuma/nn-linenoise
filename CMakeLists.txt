@@ -21,6 +21,8 @@ target_link_libraries(nn_cli
 target_include_directories(nn_cli
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
+    PRIVATE
+    internal/
 )
 
 add_library(linenoise_org

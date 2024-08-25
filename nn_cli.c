@@ -7,6 +7,8 @@
 #include <sys/select.h>
 #include "linenoise.h"
 
+#include "check_config.h"
+
 #define MAX_NUM_OF_WORDS_PER_COMMAND 20
 #define COMMAND_STRING_MAX_LEN 1024
 
