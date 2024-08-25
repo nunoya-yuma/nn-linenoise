@@ -91,7 +91,7 @@ static void CallRegisteredCommand(const char *a_command)
         {
             if (s_registered_command_list[i].m_func(argc, args))
             {
-                printf("\n[Usage]\n%s | %s\n", s_registered_command_list[i].m_name, s_registered_command_list[i].m_help_msg);
+                NNCli_LogWarn("Command args are incorrect. %s | %s", s_registered_command_list[i].m_name, s_registered_command_list[i].m_help_msg);
             }
             is_found = true;
             break;
@@ -100,7 +100,7 @@ static void CallRegisteredCommand(const char *a_command)
 
     if (!is_found)
     {
-        printf("Invalid command: '%s'\n", a_command);
+        NNCli_LogError("Invalid command: '%s'", a_command);
     }
 }
 
@@ -117,14 +117,14 @@ NNCli_Err_t NNCli_RegisterCommand(const NNCli_Register_t *a_cmd)
     // Allow m_options to be NULL.
     if (a_cmd == NULL || a_cmd->m_func == NULL || a_cmd->m_name == NULL || a_cmd->m_help_msg == NULL)
     {
-        printf("[NN_Linenoise] Error: An invalid command was attempted to be registered\n");
+        NNCli_LogError("An invalid command was attempted to be registered");
         res = NN_CLI__INVALID_ARGS;
         goto done;
     }
 
     if (s_current_registered_cmd_num >= NN_CLI__MAX_COMMAND_NUM)
     {
-        printf("[NN_Linenoise] Error: The maximum number of commands that can be registered has been exceeded\n");
+        NNCli_LogError("The maximum number of commands that can be registered has been exceeded");
         res = NN_CLI__EXCEED_CAPACITY;
         goto done;
     }
@@ -149,7 +149,7 @@ NNCli_Err_t NNCli_Init(int argc, char **argv)
         if (!strcmp(*argv, "--multiline"))
         {
             linenoiseSetMultiLine(1);
-            printf("Multi-line mode enabled.\n");
+            NNCli_LogInfo("Multi-line mode enabled");
         }
         else if (!strcmp(*argv, "--keycodes"))
         {
@@ -162,7 +162,7 @@ NNCli_Err_t NNCli_Init(int argc, char **argv)
         }
         else
         {
-            fprintf(stderr, "Usage: %s [--multiline] [--keycodes] [--async]\n", prgname);
+            NNCli_LogError("Usage: %s [--multiline] [--keycodes] [--async]", prgname);
             exit(1);
         }
     }
@@ -248,7 +248,7 @@ NNCli_Err_t NNCli_Run(void)
             // Timeout occurred
             static int counter = 0;
             linenoiseHide(&ls);
-            printf("Async output %d.\n", counter++);
+            NNCli_LogInfo("Async output %d", counter++);
             linenoiseShow(&ls);
             goto done;
         }
@@ -282,7 +282,7 @@ NNCli_Err_t NNCli_Run(void)
     }
     else if (line[0] == '/')
     {
-        printf("Unrecognized command: %s\n", line);
+        NNCli_LogError("Unrecognized command: %s", line);
     }
     free(line);
 
