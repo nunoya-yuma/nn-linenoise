@@ -17,3 +17,8 @@
 #ifndef NNCli_LogError
 #define NNCli_LogError(fmt, ...) fprintf(stderr, "[NNCli][ERROR]" fmt "\n", ##__VA_ARGS__)
 #endif
+
+#ifndef NNCli_Assert
+#include <assert.h>
+#define NNCli_Assert(condition) assert(condition)
+#endif

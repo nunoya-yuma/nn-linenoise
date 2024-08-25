@@ -18,6 +18,9 @@ static int s_current_registered_cmd_num;
 
 void completion(const char *buf, linenoiseCompletions *lc)
 {
+    NNCli_Assert(buf);
+    NNCli_Assert(lc);
+
     bool found = false;
     for (int i = 0; i < s_current_registered_cmd_num; i++)
     {
@@ -37,6 +40,10 @@ void completion(const char *buf, linenoiseCompletions *lc)
 
 char *hints(const char *buf, int *color, int *bold)
 {
+    NNCli_Assert(buf);
+    NNCli_Assert(color);
+    NNCli_Assert(bold);
+
     static char option_str[COMMAND_STRING_MAX_LEN];
     memset(option_str, 0, sizeof(option_str));
 
@@ -64,6 +71,9 @@ char *hints(const char *buf, int *color, int *bold)
 
 static int SplitStringWithSpace(const char *a_raw_command, char **out_tokens)
 {
+    NNCli_Assert(a_raw_command);
+    NNCli_Assert(out_tokens);
+
     static char strCopy[COMMAND_STRING_MAX_LEN];
     strncpy(strCopy, a_raw_command, sizeof(strCopy) - 1);
     strCopy[sizeof(strCopy) - 1] = '\0';
@@ -83,6 +93,8 @@ static int SplitStringWithSpace(const char *a_raw_command, char **out_tokens)
 
 static void CallRegisteredCommand(const char *a_command)
 {
+    NNCli_Assert(a_command);
+
     bool is_found = false;
     for (int i = 0; i < s_current_registered_cmd_num; i++)
     {
@@ -115,7 +127,6 @@ static void CallRegisteredCommand(const char *a_command)
 NNCli_Err_t NNCli_RegisterCommand(const NNCli_Register_t *a_cmd)
 {
     NNCli_Err_t res = NN_CLI__SUCCESS;
-
     // Allow m_options to be NULL.
     if (a_cmd == NULL || a_cmd->m_func == NULL || a_cmd->m_name == NULL || a_cmd->m_help_msg == NULL)
     {
