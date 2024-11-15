@@ -119,7 +119,19 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    NNCli_Init(argc, argv);
+    NNCli_Option_t option = {
+        .m_enable_multi_line = true,
+        .m_show_key_codes = false,
+        .m_async = {
+            .m_enabled = true,
+            .m_timeout = {
+                .tv_sec = 1,
+                .tv_usec = 0,
+            },
+        },
+        .m_history_filename = "/tmp/history.txt",
+    };
+    NNCli_Init(&option);
 
     while (NNCli_Run() == NN_CLI__SUCCESS)
     {

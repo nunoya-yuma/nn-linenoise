@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stdbool.h>
+#include <sys/time.h>
+
 typedef int (*NNCli_Command_t)(int argc, char **argv);
 
 typedef struct
@@ -9,6 +12,20 @@ typedef struct
     const char *m_options;
     const char *m_help_msg;
 } NNCli_Register_t;
+
+typedef struct
+{
+    bool m_enabled;
+    struct timeval m_timeout;
+} NNCli_AsyncOption_t;
+
+typedef struct
+{
+    bool m_enable_multi_line;
+    bool m_show_key_codes;
+    NNCli_AsyncOption_t m_async;
+    const char *m_history_filename;
+} NNCli_Option_t;
 
 typedef enum
 {
@@ -26,7 +43,7 @@ extern "C"
 #endif
 
     NNCli_Err_t NNCli_RegisterCommand(const NNCli_Register_t *a_cmd);
-    NNCli_Err_t NNCli_Init(int argc, char **argv);
+    NNCli_Err_t NNCli_Init(const NNCli_Option_t *a_option);
     NNCli_Err_t NNCli_Run(void);
 
 #ifdef __cplusplus
