@@ -12,7 +12,7 @@
 #define MAX_NUM_OF_WORDS_PER_COMMAND 20
 #define COMMAND_STRING_MAX_LEN 1024
 
-static int s_async;
+static NNCli_AsyncOption_t s_async;
 static NNCli_Register_t s_registered_command_list[NN_CLI__MAX_COMMAND_NUM];
 static int s_current_registered_cmd_num;
 
@@ -149,35 +149,39 @@ done:
     return res;
 }
 
-NNCli_Err_t NNCli_Init(int argc, char **argv)
+NNCli_Err_t NNCli_Init(const NNCli_Option_t *a_option)
 {
+    NNCli_Assert(a_option);
+    NNCli_Assert(a_option->m_history_filename);
+    NNCli_Assert(strlen(a_option->m_history_filename) > 0);
+
     NNCli_Err_t res = NN_CLI__SUCCESS;
-    char *prgname = argv[0];
 
     /* Parse options, with --multiline we enable multi line editing. */
-    while (argc > 1)
+    if (a_option->m_enable_multi_line)
     {
-        argc--;
-        argv++;
-        if (!strcmp(*argv, "--multiline"))
-        {
-            linenoiseSetMultiLine(1);
-            NNCli_LogInfo("Multi-line mode enabled");
-        }
-        else if (!strcmp(*argv, "--keycodes"))
-        {
-            linenoisePrintKeyCodes();
-            exit(0);
-        }
-        else if (!strcmp(*argv, "--async"))
-        {
-            s_async = 1;
-        }
-        else
-        {
-            NNCli_LogError("Usage: %s [--multiline] [--keycodes] [--async]", prgname);
-            exit(1);
-        }
+        NNCli_LogInfo("Multi-line mode enabled");
+        linenoiseSetMultiLine(1);
+    }
+    if (a_option->m_show_key_codes)
+    {
+        NNCli_LogInfo("Print key codes mode enabled");
+        // Enter a loop within this function and stop the program after it finishes by "quit"
+        linenoisePrintKeyCodes();
+        exit(0);
+    }
+    if (a_option->m_async.m_enabled)
+    {
+        NNCli_LogInfo("Async mode enabled");
+        s_async = a_option->m_async;
+    }
+
+    /* Load history from file. The history file is just a plain text file
+     * where entries are separated by newlines. */
+    if (linenoiseHistoryLoad(a_option->m_history_filename))
+    {
+        res = NN_CLI__EXTERNAL_LIB_ERROR;
+        goto done;
     }
 
     /* Set the completion callback. This will be called every time the
@@ -185,13 +189,7 @@ NNCli_Err_t NNCli_Init(int argc, char **argv)
     linenoiseSetCompletionCallback(completion);
     linenoiseSetHintsCallback(hints);
 
-    /* Load history from file. The history file is just a plain text file
-     * where entries are separated by newlines. */
-    if (linenoiseHistoryLoad("/tmp/history.txt"))
-    {
-        res = NN_CLI__EXTERNAL_LIB_ERROR;
-    }
-
+done:
     return res;
 }
 
@@ -205,7 +203,7 @@ NNCli_Err_t NNCli_Run(void)
 {
     NNCli_Err_t err = NN_CLI__SUCCESS;
     char *line;
-    if (!s_async)
+    if (!s_async.m_enabled)
     {
         line = linenoise("> ");
         if (line == NULL)
@@ -231,13 +229,11 @@ NNCli_Err_t NNCli_Run(void)
         }
 
         fd_set readfds;
-        struct timeval tv;
         int retval;
+        struct timeval tv = s_async.m_timeout;
 
         FD_ZERO(&readfds);
         FD_SET(ls.ifd, &readfds);
-        tv.tv_sec = 1; // 1 sec timeout
-        tv.tv_usec = 0;
 
         retval = select(ls.ifd + 1, &readfds, NULL, NULL, &tv);
         if (retval == -1)
