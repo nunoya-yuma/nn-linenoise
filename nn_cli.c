@@ -107,7 +107,7 @@ static void CallRegisteredCommand(const char *a_command)
     }
 
     // If the command is found, return above and do not come here.
-    NNCli_LogError("Command not found: '%s'", a_command);
+    NNCli_LogError("Command not found");
 }
 
 /**
@@ -146,6 +146,33 @@ static NNCli_Err_t HistoryLenCommand(int argc, char **argv)
     return NN_CLI__SUCCESS;
 }
 
+static NNCli_Err_t MaskCommand(int argc, char **argv)
+{
+    NNCli_Err_t res = NN_CLI__INVALID_ARGS;
+    if (argc != 2)
+    {
+        goto done;
+    }
+
+    if (strcmp(argv[1], "on") == 0)
+    {
+        linenoiseMaskModeEnable();
+    }
+    else if (strcmp(argv[1], "off") == 0)
+    {
+        linenoiseMaskModeDisable();
+    }
+    else
+    {
+        goto done;
+    }
+
+    res = NN_CLI__SUCCESS;
+
+done:
+    return res;
+}
+
 static void RegisterDefaultCommand(void)
 {
     NNCli_Command_t help_command = {
@@ -163,6 +190,14 @@ static void RegisterDefaultCommand(void)
         .m_options = "size",
     };
     NNCli_Assert(NNCli_RegisterCommand(&history_len_command) == NN_CLI__SUCCESS);
+
+    NNCli_Command_t mask_command = {
+        .m_func = MaskCommand,
+        .m_help_msg = "Turn on/off masking of input characters <on/off>",
+        .m_name = "mask",
+        .m_options = "on/off",
+    };
+    NNCli_Assert(NNCli_RegisterCommand(&mask_command) == NN_CLI__SUCCESS);
 }
 
 /**
@@ -318,23 +353,11 @@ NNCli_Err_t NNCli_Run(void)
     }
 
     /* Do something with the string. */
-    if (line[0] != '\0' && line[0] != '/')
+    if (line[0] != '\0')
     {
         CallRegisteredCommand(line);
         linenoiseHistoryAdd(line);                /* Add to the history. */
         linenoiseHistorySave("/tmp/history.txt"); /* Save the history on disk. */
-    }
-    else if (!strncmp(line, "/mask", 5))
-    {
-        linenoiseMaskModeEnable();
-    }
-    else if (!strncmp(line, "/unmask", 7))
-    {
-        linenoiseMaskModeDisable();
-    }
-    else if (line[0] == '/')
-    {
-        NNCli_LogError("Unrecognized command: %s", line);
     }
     free(line);
 
