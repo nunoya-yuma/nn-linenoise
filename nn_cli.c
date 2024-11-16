@@ -52,12 +52,8 @@ static char *hints(const char *buf, int *color, int *bold)
 
     for (int i = 0; i < s_current_registered_cmd_num; i++)
     {
-        if (s_registered_command_list[i].m_options == NULL)
-        {
-            continue;
-        }
-
-        if (strcmp(buf, s_registered_command_list[i].m_name) == 0)
+        if (strcmp(buf, s_registered_command_list[i].m_name) == 0 &&
+            s_registered_command_list[i].m_options != NULL)
         {
             option_str[0] = ' ';
             // 2 byte (subtracted at the end ) = 1 byte (for the first move) + 1 byte (of the last null character)
@@ -95,7 +91,6 @@ static void CallRegisteredCommand(const char *a_command)
 {
     NNCli_Assert(a_command);
 
-    bool is_found = false;
     for (int i = 0; i < s_current_registered_cmd_num; i++)
     {
         char *args[MAX_NUM_OF_WORDS_PER_COMMAND];
@@ -107,15 +102,12 @@ static void CallRegisteredCommand(const char *a_command)
             {
                 NNCli_LogWarn("Command args are incorrect. %s | %s", s_registered_command_list[i].m_name, s_registered_command_list[i].m_help_msg);
             }
-            is_found = true;
-            break;
+            return;
         }
     }
 
-    if (!is_found)
-    {
-        NNCli_LogError("Invalid command: '%s'", a_command);
-    }
+    // If the command is found, return above and do not come here.
+    NNCli_LogError("Command not found: '%s'", a_command);
 }
 
 /**
