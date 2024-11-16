@@ -110,6 +110,82 @@ static void CallRegisteredCommand(const char *a_command)
     NNCli_LogError("Command not found");
 }
 
+static NNCli_Err_t GetInputAsync(char **out_string)
+{
+    /* Asynchronous mode using the multiplexing API: wait for
+     * data on stdin, and simulate async data coming from some source
+     * using the select(2) timeout. */
+    NNCli_Err_t ret = NN_CLI_IN_PROGRESS;
+    static bool s_is_async_started = false;
+    static struct linenoiseState ls;
+    static char buf[1024];
+    if (!s_is_async_started)
+    {
+        memset(buf, 0, sizeof(buf));
+        memset(&ls, 0, sizeof(ls));
+        s_is_async_started = true;
+        linenoiseEditStart(&ls, -1, -1, buf, sizeof(buf), "> ");
+    }
+
+    fd_set readfds;
+    int retval;
+    struct timeval tv = s_async.m_timeout;
+
+    FD_ZERO(&readfds);
+    FD_SET(ls.ifd, &readfds);
+
+    retval = select(ls.ifd + 1, &readfds, NULL, NULL, &tv);
+    if (retval == -1)
+    {
+        perror("select()");
+        exit(1);
+    }
+    else if (retval)
+    {
+        *out_string = linenoiseEditFeed(&ls);
+        /* A NULL return means: line editing is continuing.
+         * Otherwise the user hit enter or stopped editing
+         * (CTRL+C/D). */
+        if (*out_string == linenoiseEditMore)
+        {
+            goto done;
+        }
+    }
+    else
+    {
+        // Timeout occurred
+        static int counter = 0;
+        linenoiseHide(&ls);
+        NNCli_LogInfo("Async output %d", counter++);
+        linenoiseShow(&ls);
+        goto done;
+    }
+
+    linenoiseEditStop(&ls);
+    s_is_async_started = false;
+    if (*out_string == NULL)
+    {
+        exit(0); /* Ctrl+D/C. */
+    }
+
+    ret = NN_CLI__SUCCESS;
+
+done:
+    return ret;
+}
+
+static NNCli_Err_t GetInputSync(char **out_string)
+{
+    char *line = linenoise("> ");
+    if (line == NULL)
+    {
+        return NN_CLI__PROCESS_COMPLETED;
+    }
+
+    *out_string = line;
+    return NN_CLI__SUCCESS;
+}
+
 /**
  * Default CLI commands
  */
@@ -279,7 +355,7 @@ done:
 
 /* Now this is the main loop of the typical linenoise-based application.
  * The call to linenoise() will block as long as the user types something
- * and presses enter.
+ * and presses enter. linenoise() is called at GetInputAsync() and GetInputSync().
  *
  * The typed string is returned as a malloc() allocated string by
  * linenoise, so the user needs to free() it. */
@@ -287,69 +363,22 @@ NNCli_Err_t NNCli_Run(void)
 {
     NNCli_Err_t err = NN_CLI__SUCCESS;
     char *line;
-    if (!s_async.m_enabled)
+    if (s_async.m_enabled)
     {
-        line = linenoise("> ");
-        if (line == NULL)
+        NNCli_Err_t ret_async = GetInputAsync(&line);
+        if (ret_async == NN_CLI_IN_PROGRESS)
         {
-            err = NN_CLI__PROCESS_COMPLETED;
             goto done;
         }
     }
     else
     {
-        /* Asynchronous mode using the multiplexing API: wait for
-         * data on stdin, and simulate async data coming from some source
-         * using the select(2) timeout. */
-        static bool s_is_async_started = false;
-        static struct linenoiseState ls;
-        static char buf[1024];
-        if (!s_is_async_started)
+        NNCli_Err_t ret_sync = GetInputSync(&line);
+        if (ret_sync != NN_CLI__SUCCESS)
         {
-            memset(buf, 0, sizeof(buf));
-            memset(&ls, 0, sizeof(ls));
-            s_is_async_started = true;
-            linenoiseEditStart(&ls, -1, -1, buf, sizeof(buf), "> ");
-        }
-
-        fd_set readfds;
-        int retval;
-        struct timeval tv = s_async.m_timeout;
-
-        FD_ZERO(&readfds);
-        FD_SET(ls.ifd, &readfds);
-
-        retval = select(ls.ifd + 1, &readfds, NULL, NULL, &tv);
-        if (retval == -1)
-        {
-            perror("select()");
-            exit(1);
-        }
-        else if (retval)
-        {
-            line = linenoiseEditFeed(&ls);
-            /* A NULL return means: line editing is continuing.
-             * Otherwise the user hit enter or stopped editing
-             * (CTRL+C/D). */
-            if (line == linenoiseEditMore)
-            {
-                goto done;
-            }
-        }
-        else
-        {
-            // Timeout occurred
-            static int counter = 0;
-            linenoiseHide(&ls);
-            NNCli_LogInfo("Async output %d", counter++);
-            linenoiseShow(&ls);
+            err = ret_sync;
             goto done;
         }
-
-        linenoiseEditStop(&ls);
-        s_is_async_started = false;
-        if (line == NULL)
-            exit(0); /* Ctrl+D/C. */
     }
 
     /* Do something with the string. */
