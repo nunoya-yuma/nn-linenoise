@@ -110,6 +110,10 @@ static void CallRegisteredCommand(const char *a_command)
     NNCli_LogError("Command not found: '%s'", a_command);
 }
 
+/**
+ * Default CLI commands
+ */
+
 static void ShowAllCommands(void)
 {
     for (int i = 0; i < s_current_registered_cmd_num; i++)
@@ -129,6 +133,19 @@ static NNCli_Err_t HelpCommand(int argc, char **argv)
     return NN_CLI__SUCCESS;
 }
 
+static NNCli_Err_t HistoryLenCommand(int argc, char **argv)
+{
+    if (argc != 2)
+    {
+        return NN_CLI__INVALID_ARGS;
+    }
+
+    /* The "/historylen" command will change the history len. */
+    linenoiseHistorySetMaxLen(atoi(argv[1]));
+
+    return NN_CLI__SUCCESS;
+}
+
 static void RegisterDefaultCommand(void)
 {
     NNCli_Command_t help_command = {
@@ -138,6 +155,14 @@ static void RegisterDefaultCommand(void)
         .m_options = NULL,
     };
     NNCli_Assert(NNCli_RegisterCommand(&help_command) == NN_CLI__SUCCESS);
+
+    NNCli_Command_t history_len_command = {
+        .m_func = HistoryLenCommand,
+        .m_help_msg = "Set the number of histories to keep",
+        .m_name = "historylen",
+        .m_options = "size",
+    };
+    NNCli_Assert(NNCli_RegisterCommand(&history_len_command) == NN_CLI__SUCCESS);
 }
 
 /**
@@ -298,12 +323,6 @@ NNCli_Err_t NNCli_Run(void)
         CallRegisteredCommand(line);
         linenoiseHistoryAdd(line);                /* Add to the history. */
         linenoiseHistorySave("/tmp/history.txt"); /* Save the history on disk. */
-    }
-    else if (!strncmp(line, "/historylen", 11))
-    {
-        /* The "/historylen" command will change the history len. */
-        int len = atoi(line + 11);
-        linenoiseHistorySetMaxLen(len);
     }
     else if (!strncmp(line, "/mask", 5))
     {
