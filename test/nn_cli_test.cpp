@@ -15,7 +15,7 @@ namespace testing
 {
     TEST(NNCliTest, RegisterCommand)
     {
-        const NNCli_Register_t cmd = {
+        const NNCli_Command_t cmd = {
             /* .m_func = */ TestCmdFunc,
             /* .m_name = */ "test-cmd",
             /* .m_help_msg = */ "test help msg",
