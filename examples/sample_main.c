@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <getopt.h>
 
 #include "nn_cli.h"
 
@@ -93,8 +95,72 @@ done:
     return res;
 }
 
+static NNCli_Option_t parse_args_and_get_option(int argc, char **argv)
+{
+    NNCli_Option_t ret_option = {0};
+    int opt;
+    int option_index = 0;
+
+    struct option long_options[] = {
+        {"help", no_argument, NULL, 'h'},
+        {"async", no_argument, NULL, 'a'},
+        {"key-codes", no_argument, NULL, 'k'},
+        {"multi-line", no_argument, NULL, 'm'},
+        {0, 0, 0, 0},
+    };
+
+    while ((opt = getopt_long(argc, argv, "hakm", long_options, &option_index)) != -1)
+    {
+        switch (opt)
+        {
+        case 'h':
+            printf("Usage: %s [options]\n", argv[0]);
+            printf("Options:\n");
+            printf("  -h, --help    Show this help message\n");
+            printf("  -a, --async    Input processing is asynchronous.\n");
+            printf("  -k, --key-codes    Displays the code of the character typed in.\n");
+            printf("  -m, --multi-line    The string will automatically wrap when it reaches the edge of the screen.\n");
+            exit(0);
+
+        case 'a':
+            ret_option.m_async.m_enabled = true;
+            // By setting this timeout, input is monitored for 1 second before exiting the process.
+            ret_option.m_async.m_timeout.tv_sec = 1;
+            ret_option.m_async.m_timeout.tv_usec = 0;
+            break;
+
+        case 'k':
+            ret_option.m_show_key_codes = true;
+            break;
+
+        case 'm':
+            ret_option.m_enable_multi_line = true;
+            break;
+
+        case '?':
+            fprintf(stderr, "Invalid option\n");
+            exit(1);
+
+        default:
+            fprintf(stderr, "Unexpected case\n");
+            exit(1);
+        }
+    }
+
+    if (optind != argc)
+    {
+        fprintf(stderr, "Non-option argument: %s\n", argv[optind]);
+        exit(1);
+    }
+
+    return ret_option;
+}
+
 int main(int argc, char **argv)
 {
+    NNCli_Option_t option = parse_args_and_get_option(argc, argv);
+    option.m_history_filename = "/tmp/history.txt";
+
     NNCli_Register_t sample_status_cmd_config = {
         .m_func = Sample_ShowStatusCmd,
         .m_name = "sample-status",
@@ -119,18 +185,6 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    NNCli_Option_t option = {
-        .m_enable_multi_line = true,
-        .m_show_key_codes = false,
-        .m_async = {
-            .m_enabled = true,
-            .m_timeout = {
-                .tv_sec = 1,
-                .tv_usec = 0,
-            },
-        },
-        .m_history_filename = "/tmp/history.txt",
-    };
     NNCli_Init(&option);
 
     while (NNCli_Run() == NN_CLI__SUCCESS)
