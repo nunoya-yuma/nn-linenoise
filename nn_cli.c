@@ -103,7 +103,7 @@ static void CallRegisteredCommand(const char *a_command)
         const char *first_command = args[0];
         if (strncmp(first_command, s_registered_command_list[i].m_name, strlen(first_command)) == 0)
         {
-            if (s_registered_command_list[i].m_func(argc, args))
+            if (s_registered_command_list[i].m_func(argc, args) != NN_CLI__SUCCESS)
             {
                 NNCli_LogWarn("Command args are incorrect. %s | %s", s_registered_command_list[i].m_name, s_registered_command_list[i].m_help_msg);
             }

@@ -40,13 +40,13 @@ static const char *GetStringFromSampleStatus(SampleStatus_t a_status)
     return status_str;
 }
 
-static int Sample_ShowStatusCmd(int argc, char **argv)
+static NNCli_Err_t Sample_ShowStatusCmd(int argc, char **argv)
 {
-    int res = 0;
+    int res = NN_CLI__SUCCESS;
     if (argc != 1)
     {
         printf("[NN] %s:%d Error input!\n", __FILE__, __LINE__);
-        res = 1;
+        res = NN_CLI__INVALID_ARGS;
         goto done;
     }
 
@@ -56,13 +56,13 @@ done:
     return res;
 }
 
-static int Sample_CtrlCmd(int argc, char **argv)
+static NNCli_Err_t Sample_CtrlCmd(int argc, char **argv)
 {
-    int res = 0;
+    int res = NN_CLI__SUCCESS;
     if (argc != 2)
     {
         printf("[NN] %s:%d Error input!\n", __FILE__, __LINE__);
-        res = 1;
+        res = NN_CLI__INVALID_ARGS;
         goto done;
     }
 
@@ -78,7 +78,7 @@ static int Sample_CtrlCmd(int argc, char **argv)
     else
     {
         printf("[NN] %s:%d Error input!\n", __FILE__, __LINE__);
-        res = 1;
+        res = NN_CLI__INVALID_ARGS;
         goto done;
     }
 
