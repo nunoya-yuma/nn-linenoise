@@ -116,14 +116,14 @@ static NNCli_Err_t GetInputAsync(char **out_string)
      * data on stdin, and simulate async data coming from some source
      * using the select(2) timeout. */
     NNCli_Err_t ret = NN_CLI_IN_PROGRESS;
-    static bool s_is_async_started = false;
+    static bool s_requires_init = true;
     static struct linenoiseState ls;
     static char buf[1024];
-    if (!s_is_async_started)
+    if (s_requires_init)
     {
         memset(buf, 0, sizeof(buf));
         memset(&ls, 0, sizeof(ls));
-        s_is_async_started = true;
+        s_requires_init = false;
         linenoiseEditStart(&ls, -1, -1, buf, sizeof(buf), "> ");
     }
 
@@ -154,15 +154,21 @@ static NNCli_Err_t GetInputAsync(char **out_string)
     else
     {
         // Timeout occurred
-        static int counter = 0;
-        linenoiseHide(&ls);
-        NNCli_LogInfo("Async output %d", counter++);
-        linenoiseShow(&ls);
+
+        // static int s_debug_print_counter = 0;
+        // if (s_debug_print_counter < 3 || s_debug_print_counter % 10 == 0)
+        // {
+        //     linenoiseHide(&ls);
+        //     printf("...\r\n");
+        //     linenoiseShow(&ls);
+        // }
+        // ++s_debug_print_counter;
+
         goto done;
     }
 
     linenoiseEditStop(&ls);
-    s_is_async_started = false;
+    s_requires_init = true;
     if (*out_string == NULL)
     {
         exit(0); /* Ctrl+D/C. */
