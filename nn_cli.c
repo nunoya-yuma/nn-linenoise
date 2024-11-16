@@ -13,7 +13,7 @@
 #define COMMAND_STRING_MAX_LEN 1024
 
 static NNCli_AsyncOption_t s_async;
-static NNCli_Register_t s_registered_command_list[NN_CLI__MAX_COMMAND_NUM];
+static NNCli_Command_t s_registered_command_list[NN_CLI__MAX_COMMAND_NUM];
 static int s_current_registered_cmd_num;
 
 static void completion(const char *buf, linenoiseCompletions *lc)
@@ -124,7 +124,7 @@ static void CallRegisteredCommand(const char *a_command)
  *
  */
 
-NNCli_Err_t NNCli_RegisterCommand(const NNCli_Register_t *a_cmd)
+NNCli_Err_t NNCli_RegisterCommand(const NNCli_Command_t *a_cmd)
 {
     NNCli_Err_t res = NN_CLI__SUCCESS;
     // Allow m_options to be NULL.
@@ -142,7 +142,7 @@ NNCli_Err_t NNCli_RegisterCommand(const NNCli_Register_t *a_cmd)
         goto done;
     }
 
-    memcpy(&s_registered_command_list[s_current_registered_cmd_num], a_cmd, sizeof(NNCli_Register_t));
+    memcpy(&s_registered_command_list[s_current_registered_cmd_num], a_cmd, sizeof(NNCli_Command_t));
     s_current_registered_cmd_num++;
 
 done:

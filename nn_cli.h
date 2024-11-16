@@ -3,15 +3,15 @@
 #include <stdbool.h>
 #include <sys/time.h>
 
-typedef int (*NNCli_Command_t)(int argc, char **argv);
+typedef int (*NNCli_Func_t)(int argc, char **argv);
 
 typedef struct
 {
-    NNCli_Command_t m_func;
+    NNCli_Func_t m_func;
     const char *m_name;
     const char *m_options;
     const char *m_help_msg;
-} NNCli_Register_t;
+} NNCli_Command_t;
 
 typedef struct
 {
@@ -42,7 +42,7 @@ extern "C"
 {
 #endif
 
-    NNCli_Err_t NNCli_RegisterCommand(const NNCli_Register_t *a_cmd);
+    NNCli_Err_t NNCli_RegisterCommand(const NNCli_Command_t *a_cmd);
     NNCli_Err_t NNCli_Init(const NNCli_Option_t *a_option);
     NNCli_Err_t NNCli_Run(void);
 
