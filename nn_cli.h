@@ -3,10 +3,23 @@
 #include <stdbool.h>
 #include <sys/time.h>
 
-typedef int (*NNCli_Func_t)(int argc, char **argv);
+typedef enum
+{
+    NN_CLI__SUCCESS = 0,        // No errors have occurred.
+    NN_CLI__GENERAL_ERROR,      // Errors that are difficult to categorize specifically.
+    NN_CLI__INVALID_ARGS,       // Input arguments are incorrect.
+    NN_CLI__EXCEED_CAPACITY,    // The size limit for arrays, etc. has been reached.
+    NN_CLI__EXTERNAL_LIB_ERROR, // Errors in external libraries or tools used
+    NN_CLI__PROCESS_COMPLETED,  // This indicates that the process has been completed, but it may have been completed successfully.
+} NNCli_Err_t;
+
+typedef NNCli_Err_t (*NNCli_Func_t)(int argc, char **argv);
 
 typedef struct
 {
+    // `m_func` should return `NN_CLI__SUCCESS` if no error occurs.
+    // If an error occurs, return another error.
+    // The type of these errors does not affect the operation.
     NNCli_Func_t m_func;
     const char *m_name;
     const char *m_options;
@@ -26,16 +39,6 @@ typedef struct
     NNCli_AsyncOption_t m_async;
     const char *m_history_filename;
 } NNCli_Option_t;
-
-typedef enum
-{
-    NN_CLI__SUCCESS = 0,        // No errors have occurred.
-    NN_CLI__GENERAL_ERROR,      // Errors that are difficult to categorize specifically.
-    NN_CLI__INVALID_ARGS,       // Input arguments are incorrect.
-    NN_CLI__EXCEED_CAPACITY,    // The size limit for arrays, etc. has been reached.
-    NN_CLI__EXTERNAL_LIB_ERROR, // Errors in external libraries or tools used
-    NN_CLI__PROCESS_COMPLETED,  // This indicates that the process has been completed, but it may have been completed successfully.
-} NNCli_Err_t;
 
 #ifdef __cplusplus
 extern "C"
