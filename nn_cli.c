@@ -110,6 +110,36 @@ static void CallRegisteredCommand(const char *a_command)
     NNCli_LogError("Command not found: '%s'", a_command);
 }
 
+static void ShowAllCommands(void)
+{
+    for (int i = 0; i < s_current_registered_cmd_num; i++)
+    {
+        printf("%s: %s\n", s_registered_command_list[i].m_name, s_registered_command_list[i].m_help_msg);
+    }
+}
+
+static NNCli_Err_t HelpCommand(int argc, char **argv)
+{
+    if (argc != 1)
+    {
+        return NN_CLI__INVALID_ARGS;
+    }
+
+    ShowAllCommands();
+    return NN_CLI__SUCCESS;
+}
+
+static void RegisterDefaultCommand(void)
+{
+    NNCli_Command_t help_command = {
+        .m_func = HelpCommand,
+        .m_help_msg = "Show registered commands",
+        .m_name = "help",
+        .m_options = NULL,
+    };
+    NNCli_Assert(NNCli_RegisterCommand(&help_command) == NN_CLI__SUCCESS);
+}
+
 /**
  *
  * Public functions
@@ -175,6 +205,8 @@ NNCli_Err_t NNCli_Init(const NNCli_Option_t *a_option)
         res = NN_CLI__EXTERNAL_LIB_ERROR;
         goto done;
     }
+
+    RegisterDefaultCommand();
 
     /* Set the completion callback. This will be called every time the
      * user uses the <tab> key. */
