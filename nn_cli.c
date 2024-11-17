@@ -15,6 +15,7 @@
 static NNCli_AsyncOption_t s_async;
 static NNCli_Command_t s_registered_command_list[NN_CLI__MAX_COMMAND_NUM];
 static int s_current_registered_cmd_num;
+static char *s_history_filename;
 
 static void completion(const char *buf, linenoiseCompletions *lc)
 {
@@ -340,9 +341,14 @@ NNCli_Err_t NNCli_Init(const NNCli_Option_t *a_option)
         s_async = a_option->m_async;
     }
 
+    // This is not released by free() until the end, because it is used to save the command each time.
+    s_history_filename = (char *)malloc(strlen(a_option->m_history_filename) + 1);
+    NNCli_Assert(s_history_filename != NULL);
+    strcpy(s_history_filename, a_option->m_history_filename);
+
     /* Load history from file. The history file is just a plain text file
      * where entries are separated by newlines. */
-    if (linenoiseHistoryLoad(a_option->m_history_filename))
+    if (linenoiseHistoryLoad(s_history_filename))
     {
         res = NN_CLI__EXTERNAL_LIB_ERROR;
         goto done;
@@ -392,7 +398,7 @@ NNCli_Err_t NNCli_Run(void)
     {
         CallRegisteredCommand(line);
         linenoiseHistoryAdd(line);                /* Add to the history. */
-        linenoiseHistorySave("/tmp/history.txt"); /* Save the history on disk. */
+        linenoiseHistorySave(s_history_filename); /* Save the history on disk. */
     }
     free(line);
 
