@@ -185,7 +185,10 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    NNCli_Init(&option);
+    if (NNCli_Init(&option) != NN_CLI__SUCCESS)
+    {
+        return -1;
+    }
 
     while (NNCli_Run() == NN_CLI__SUCCESS)
     {
