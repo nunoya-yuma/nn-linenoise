@@ -12,9 +12,14 @@
 #define MAX_NUM_OF_WORDS_PER_COMMAND 20
 #define COMMAND_STRING_MAX_LEN 1024
 
+typedef struct
+{
+    NNCli_Command_t m_command[NN_CLI__MAX_COMMAND_NUM];
+    size_t m_num;
+} CommandList_t;
+
 static NNCli_AsyncOption_t s_async;
-static NNCli_Command_t s_registered_command_list[NN_CLI__MAX_COMMAND_NUM];
-static int s_current_registered_cmd_num;
+static CommandList_t s_command_list;
 static char *s_history_filename;
 
 static void completion(const char *buf, linenoiseCompletions *lc)
@@ -23,11 +28,11 @@ static void completion(const char *buf, linenoiseCompletions *lc)
     NNCli_Assert(lc);
 
     bool found = false;
-    for (int i = 0; i < s_current_registered_cmd_num; i++)
+    for (int i = 0; i < s_command_list.m_num; i++)
     {
-        if (strncmp(buf, s_registered_command_list[i].m_name, strlen(buf)) == 0)
+        if (strncmp(buf, s_command_list.m_command[i].m_name, strlen(buf)) == 0)
         {
-            linenoiseAddCompletion(lc, s_registered_command_list[i].m_name);
+            linenoiseAddCompletion(lc, s_command_list.m_command[i].m_name);
             found = true;
         }
     }
@@ -51,14 +56,14 @@ static char *hints(const char *buf, int *color, int *bold)
     *color = 35;
     *bold = 0;
 
-    for (int i = 0; i < s_current_registered_cmd_num; i++)
+    for (int i = 0; i < s_command_list.m_num; i++)
     {
-        if (strcmp(buf, s_registered_command_list[i].m_name) == 0 &&
-            s_registered_command_list[i].m_options != NULL)
+        if (strcmp(buf, s_command_list.m_command[i].m_name) == 0 &&
+            s_command_list.m_command[i].m_options != NULL)
         {
             option_str[0] = ' ';
             // 2 byte (subtracted at the end ) = 1 byte (for the first move) + 1 byte (of the last null character)
-            strncpy(&option_str[1], s_registered_command_list[i].m_options, sizeof(option_str) - 2);
+            strncpy(&option_str[1], s_command_list.m_command[i].m_options, sizeof(option_str) - 2);
             break;
         }
     }
@@ -92,16 +97,16 @@ static void CallRegisteredCommand(const char *a_command)
 {
     NNCli_Assert(a_command);
 
-    for (int i = 0; i < s_current_registered_cmd_num; i++)
+    for (int i = 0; i < s_command_list.m_num; i++)
     {
         char *args[MAX_NUM_OF_WORDS_PER_COMMAND];
         int argc = SplitStringWithSpace(a_command, args);
         const char *first_command = args[0];
-        if (strncmp(first_command, s_registered_command_list[i].m_name, strlen(first_command)) == 0)
+        if (strncmp(first_command, s_command_list.m_command[i].m_name, strlen(first_command)) == 0)
         {
-            if (s_registered_command_list[i].m_func(argc, args) != NN_CLI__SUCCESS)
+            if (s_command_list.m_command[i].m_func(argc, args) != NN_CLI__SUCCESS)
             {
-                NNCli_LogWarn("Command args are incorrect. %s | %s", s_registered_command_list[i].m_name, s_registered_command_list[i].m_help_msg);
+                NNCli_LogWarn("Command args are incorrect. %s | %s", s_command_list.m_command[i].m_name, s_command_list.m_command[i].m_help_msg);
             }
             return;
         }
@@ -199,9 +204,9 @@ static NNCli_Err_t GetInputSync(char **out_string)
 
 static void ShowAllCommands(void)
 {
-    for (int i = 0; i < s_current_registered_cmd_num; i++)
+    for (int i = 0; i < s_command_list.m_num; i++)
     {
-        printf("%s: %s\n", s_registered_command_list[i].m_name, s_registered_command_list[i].m_help_msg);
+        printf("%s: %s\n", s_command_list.m_command[i].m_name, s_command_list.m_command[i].m_help_msg);
     }
 }
 
@@ -300,15 +305,15 @@ NNCli_Err_t NNCli_RegisterCommand(const NNCli_Command_t *a_cmd)
         goto done;
     }
 
-    if (s_current_registered_cmd_num >= NN_CLI__MAX_COMMAND_NUM)
+    if (s_command_list.m_num >= NN_CLI__MAX_COMMAND_NUM)
     {
         NNCli_LogError("The maximum number of commands that can be registered has been exceeded");
         res = NN_CLI__EXCEED_CAPACITY;
         goto done;
     }
 
-    memcpy(&s_registered_command_list[s_current_registered_cmd_num], a_cmd, sizeof(NNCli_Command_t));
-    s_current_registered_cmd_num++;
+    memcpy(&s_command_list.m_command[s_command_list.m_num], a_cmd, sizeof(NNCli_Command_t));
+    s_command_list.m_num++;
 
 done:
     return res;
