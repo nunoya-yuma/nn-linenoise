@@ -102,7 +102,7 @@ static void CallRegisteredCommand(const char *a_command)
         char *args[MAX_NUM_OF_WORDS_PER_COMMAND];
         int argc = SplitStringWithSpace(a_command, args);
         const char *first_command = args[0];
-        if (strncmp(first_command, s_command_list.m_command[i].m_name, strlen(first_command)) == 0)
+        if (strcmp(first_command, s_command_list.m_command[i].m_name) == 0)
         {
             if (s_command_list.m_command[i].m_func(argc, args) != NN_CLI__SUCCESS)
             {
