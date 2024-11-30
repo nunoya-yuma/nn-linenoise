@@ -321,11 +321,22 @@ done:
 
 NNCli_Err_t NNCli_Init(const NNCli_Option_t *a_option)
 {
-    NNCli_Assert(a_option);
-    NNCli_Assert(a_option->m_history_filename);
-    NNCli_Assert(strlen(a_option->m_history_filename) > 0);
-
-    NNCli_Err_t res = NN_CLI__SUCCESS;
+    NNCli_Err_t res = NN_CLI__INVALID_ARGS;
+    if (a_option == NULL)
+    {
+        NNCli_LogError("a_option is NULL");
+        goto done;
+    }
+    if (a_option->m_history_filename == NULL)
+    {
+        NNCli_LogError("a_option->m_history_filename is NULL");
+        goto done;
+    }
+    if (strlen(a_option->m_history_filename) == 0)
+    {
+        NNCli_LogError("history filename is empty");
+        goto done;
+    }
 
     /* Parse options, with --multiline we enable multi line editing. */
     if (a_option->m_enable_multi_line)
@@ -348,7 +359,12 @@ NNCli_Err_t NNCli_Init(const NNCli_Option_t *a_option)
 
     // This is not released by free() until the end, because it is used to save the command each time.
     s_history_filename = (char *)malloc(strlen(a_option->m_history_filename) + 1);
-    NNCli_Assert(s_history_filename != NULL);
+    if (s_history_filename == NULL)
+    {
+        res = NN_CLI__GENERAL_ERROR;
+        NNCli_LogError("Failed to allocate memory for history filename");
+        goto done;
+    }
     strcpy(s_history_filename, a_option->m_history_filename);
 
     /* Load history from file. The history file is just a plain text file
@@ -365,6 +381,8 @@ NNCli_Err_t NNCli_Init(const NNCli_Option_t *a_option)
      * user uses the <tab> key. */
     linenoiseSetCompletionCallback(completion);
     linenoiseSetHintsCallback(hints);
+
+    res = NN_CLI__SUCCESS;
 
 done:
     return res;
