@@ -161,7 +161,7 @@ int main(int argc, char **argv)
     NNCli_Option_t option = parse_args_and_get_option(argc, argv);
     option.m_history_filename = "/tmp/history.txt";
 
-    NNCli_Command_t sample_status_cmd_config = {
+    static const NNCli_Command_t sample_status_cmd_config = {
         .m_func = Sample_ShowStatusCmd,
         .m_name = "sample-status",
         .m_options = NULL,
@@ -173,7 +173,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    NNCli_Command_t sample_ctrl_cmd_config = {
+    static const NNCli_Command_t sample_ctrl_cmd_config = {
         .m_func = Sample_CtrlCmd,
         .m_name = "sample-ctrl",
         .m_options = "on/off",

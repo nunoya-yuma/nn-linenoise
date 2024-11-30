@@ -14,7 +14,7 @@
 
 typedef struct
 {
-    NNCli_Command_t m_command[NN_CLI__MAX_COMMAND_NUM];
+    const NNCli_Command_t *m_command[NN_CLI__MAX_COMMAND_NUM];
     size_t m_num;
 } CommandList_t;
 
@@ -30,9 +30,9 @@ static void completion(const char *buf, linenoiseCompletions *lc)
     bool found = false;
     for (int i = 0; i < s_command_list.m_num; i++)
     {
-        if (strncmp(buf, s_command_list.m_command[i].m_name, strlen(buf)) == 0)
+        if (strncmp(buf, s_command_list.m_command[i]->m_name, strlen(buf)) == 0)
         {
-            linenoiseAddCompletion(lc, s_command_list.m_command[i].m_name);
+            linenoiseAddCompletion(lc, s_command_list.m_command[i]->m_name);
             found = true;
         }
     }
@@ -58,12 +58,12 @@ static char *hints(const char *buf, int *color, int *bold)
 
     for (int i = 0; i < s_command_list.m_num; i++)
     {
-        if (strcmp(buf, s_command_list.m_command[i].m_name) == 0 &&
-            s_command_list.m_command[i].m_options != NULL)
+        if (strcmp(buf, s_command_list.m_command[i]->m_name) == 0 &&
+            s_command_list.m_command[i]->m_options != NULL)
         {
             option_str[0] = ' ';
             // 2 byte (subtracted at the end ) = 1 byte (for the first move) + 1 byte (of the last null character)
-            strncpy(&option_str[1], s_command_list.m_command[i].m_options, sizeof(option_str) - 2);
+            strncpy(&option_str[1], s_command_list.m_command[i]->m_options, sizeof(option_str) - 2);
             break;
         }
     }
@@ -102,11 +102,11 @@ static void CallRegisteredCommand(const char *a_command)
         char *args[MAX_NUM_OF_WORDS_PER_COMMAND];
         int argc = SplitStringWithSpace(a_command, args);
         const char *first_command = args[0];
-        if (strcmp(first_command, s_command_list.m_command[i].m_name) == 0)
+        if (strcmp(first_command, s_command_list.m_command[i]->m_name) == 0)
         {
-            if (s_command_list.m_command[i].m_func(argc, args) != NN_CLI__SUCCESS)
+            if (s_command_list.m_command[i]->m_func(argc, args) != NN_CLI__SUCCESS)
             {
-                NNCli_LogWarn("Command args are incorrect. %s | %s", s_command_list.m_command[i].m_name, s_command_list.m_command[i].m_help_msg);
+                NNCli_LogWarn("Command args are incorrect. %s | %s", s_command_list.m_command[i]->m_name, s_command_list.m_command[i]->m_help_msg);
             }
             return;
         }
@@ -206,7 +206,7 @@ static void ShowAllCommands(void)
 {
     for (int i = 0; i < s_command_list.m_num; i++)
     {
-        printf("%s: %s\n", s_command_list.m_command[i].m_name, s_command_list.m_command[i].m_help_msg);
+        printf("%s: %s\n", s_command_list.m_command[i]->m_name, s_command_list.m_command[i]->m_help_msg);
     }
 }
 
@@ -263,7 +263,7 @@ done:
 
 static void RegisterDefaultCommand(void)
 {
-    NNCli_Command_t help_command = {
+    static const NNCli_Command_t help_command = {
         .m_func = HelpCommand,
         .m_help_msg = "Show registered commands",
         .m_name = "help",
@@ -271,7 +271,7 @@ static void RegisterDefaultCommand(void)
     };
     NNCli_Assert(NNCli_RegisterCommand(&help_command) == NN_CLI__SUCCESS);
 
-    NNCli_Command_t history_len_command = {
+    static const NNCli_Command_t history_len_command = {
         .m_func = HistoryLenCommand,
         .m_help_msg = "Set the number of histories to keep",
         .m_name = "historylen",
@@ -279,7 +279,7 @@ static void RegisterDefaultCommand(void)
     };
     NNCli_Assert(NNCli_RegisterCommand(&history_len_command) == NN_CLI__SUCCESS);
 
-    NNCli_Command_t mask_command = {
+    static const NNCli_Command_t mask_command = {
         .m_func = MaskCommand,
         .m_help_msg = "Turn on/off masking of input characters <on/off>",
         .m_name = "mask",
@@ -312,7 +312,7 @@ NNCli_Err_t NNCli_RegisterCommand(const NNCli_Command_t *a_cmd)
         goto done;
     }
 
-    memcpy(&s_command_list.m_command[s_command_list.m_num], a_cmd, sizeof(NNCli_Command_t));
+    s_command_list.m_command[s_command_list.m_num] = a_cmd;
     s_command_list.m_num++;
 
 done:
