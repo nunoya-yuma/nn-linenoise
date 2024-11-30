@@ -4,10 +4,10 @@
 
 namespace
 {
-    int TestCmdFunc(int argc, char **argv)
+    NNCli_Err_t TestCmdFunc(int argc, char **argv)
     {
         // Nothing to do
-        return 0;
+        return NN_CLI__SUCCESS;
     }
 }
 
