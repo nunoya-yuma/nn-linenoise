@@ -120,4 +120,21 @@ namespace testing
         EXPECT_EQ(NNCli_Init(&option), NN_CLI__SUCCESS);
         free(s_history_filename);
     }
+
+    TEST_F(NNCliTest, Init_InvalidArgs)
+    {
+        EXPECT_EQ(NNCli_Init(nullptr), NN_CLI__INVALID_ARGS);
+
+        const NNCli_Option_t option = {
+            .m_enable_multi_line = true,
+            .m_show_key_codes = false,
+            .m_async = {
+                .m_enabled = false,
+                .m_timeout = {
+                    .tv_sec = 0,
+                    .tv_usec = 0},
+            },
+            .m_history_filename = ""};
+        EXPECT_EQ(NNCli_Init(&option), NN_CLI__INVALID_ARGS);
+    }
 } // namespace testing
