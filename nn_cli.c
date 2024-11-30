@@ -8,6 +8,7 @@
 #include "linenoise.h"
 
 #include "check_config.h"
+#include <sys/stat.h>
 
 #define MAX_NUM_OF_WORDS_PER_COMMAND 20
 #define COMMAND_STRING_MAX_LEN 1024
@@ -288,6 +289,24 @@ static void RegisterDefaultCommand(void)
     NNCli_Assert(NNCli_RegisterCommand(&mask_command) == NN_CLI__SUCCESS);
 }
 
+static bool CheckOrCreateFile(const char *filename)
+{
+    struct stat buffer;
+    if (stat(filename, &buffer) != 0)
+    {
+        NNCli_LogWarn("History file does not exist. Creating a new file");
+        FILE *fp = fopen(filename, "w");
+        if (fp == NULL)
+        {
+            NNCli_LogError("Failed to create history file");
+            return false;
+        }
+        fclose(fp);
+    }
+
+    return true;
+}
+
 /**
  *
  * Public functions
@@ -338,6 +357,12 @@ NNCli_Err_t NNCli_Init(const NNCli_Option_t *a_option)
         goto done;
     }
 
+    if (!CheckOrCreateFile(a_option->m_history_filename))
+    {
+        res = NN_CLI__GENERAL_ERROR;
+        goto done;
+    }
+
     /* Parse options, with --multiline we enable multi line editing. */
     if (a_option->m_enable_multi_line)
     {
@@ -375,6 +400,7 @@ NNCli_Err_t NNCli_Init(const NNCli_Option_t *a_option)
         goto done;
     }
 
+    // Register basic commands such as help.
     RegisterDefaultCommand();
 
     /* Set the completion callback. This will be called every time the
