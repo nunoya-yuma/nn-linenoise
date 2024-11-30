@@ -266,25 +266,25 @@ static void RegisterDefaultCommand(void)
 {
     static const NNCli_Command_t help_command = {
         .m_func = HelpCommand,
-        .m_help_msg = "Show registered commands",
         .m_name = "help",
         .m_options = NULL,
+        .m_help_msg = "Show registered commands",
     };
     NNCli_Assert(NNCli_RegisterCommand(&help_command) == NN_CLI__SUCCESS);
 
     static const NNCli_Command_t history_len_command = {
         .m_func = HistoryLenCommand,
-        .m_help_msg = "Set the number of histories to keep",
         .m_name = "historylen",
         .m_options = "size",
+        .m_help_msg = "Set the number of histories to keep",
     };
     NNCli_Assert(NNCli_RegisterCommand(&history_len_command) == NN_CLI__SUCCESS);
 
     static const NNCli_Command_t mask_command = {
         .m_func = MaskCommand,
-        .m_help_msg = "Turn on/off masking of input characters <on/off>",
         .m_name = "mask",
         .m_options = "on/off",
+        .m_help_msg = "Turn on/off masking of input characters <on/off>",
     };
     NNCli_Assert(NNCli_RegisterCommand(&mask_command) == NN_CLI__SUCCESS);
 }
@@ -317,7 +317,7 @@ NNCli_Err_t NNCli_RegisterCommand(const NNCli_Command_t *a_cmd)
 {
     NNCli_Err_t res = NN_CLI__SUCCESS;
     // Allow m_options to be NULL.
-    if (a_cmd == NULL || a_cmd->m_func == NULL || a_cmd->m_name == NULL || a_cmd->m_help_msg == NULL)
+    if (a_cmd == NULL || a_cmd->m_func == NULL || a_cmd->m_name == NULL || a_cmd->m_help_msg == NULL || strlen(a_cmd->m_name) == 0)
     {
         NNCli_LogError("An invalid command was attempted to be registered");
         res = NN_CLI__INVALID_ARGS;
