@@ -1,0 +1,32 @@
+name: PR Build and Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+    build_and_tests:
+        runs-on: ubuntu-latest
+
+        steps:
+        - uses: actions/checkout@v4
+          with:
+            submodules: true
+
+        - name: Install CMake
+          run: |
+            sudo apt-get update
+            sudo apt-get install -y cmake ninja-build
+
+        - name: Example build
+          run: |
+            cd examples
+            cmake -S . -B build -G Ninja
+            cmake --build build
+
+        - name: Build and run unit tests
+          run: |
+            cmake -S . -B build -G Ninja
+            cmake --build build
+            ./build/test/nn_cli_test
