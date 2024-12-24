@@ -35,6 +35,17 @@ namespace
 
         freopen(filename, "r", stdin);
     }
+
+    void GenerateDummyHistoryFile(char *filename)
+    {
+        int fd = mkstemp(filename);
+        if (fd == -1)
+        {
+            perror("mkstemp failed");
+            assert(0);
+        }
+        close(fd);
+    }
 } // namespace
 
 class NNCliTest : public ::testing::Test
@@ -130,6 +141,8 @@ namespace testing
 
     TEST_F(NNCliTest, Init_Success)
     {
+        char filename[] = "/tmp/nncli_test_history_XXXXXX";
+        GenerateDummyHistoryFile(filename);
         const NNCli_Option_t option = {
             .m_enable_multi_line = true,
             .m_show_key_codes = false,
@@ -139,7 +152,8 @@ namespace testing
                     .tv_sec = 0,
                     .tv_usec = 0},
             },
-            .m_history_filename = "test_history.txt"};
+            .m_history_filename = filename,
+        };
 
         ASSERT_EQ(NNCli_Init(&option), NN_CLI__SUCCESS);
         free(s_history_filename);
@@ -173,6 +187,9 @@ namespace testing
         };
 
         ASSERT_EQ(NNCli_RegisterCommand(&cmd), NN_CLI__SUCCESS);
+
+        char filename[] = "/tmp/nncli_test_history_XXXXXX";
+        GenerateDummyHistoryFile(filename);
         const NNCli_Option_t option = {
             .m_enable_multi_line = true,
             .m_show_key_codes = false,
@@ -182,7 +199,8 @@ namespace testing
                     .tv_sec = 0,
                     .tv_usec = 0},
             },
-            .m_history_filename = "test_history.txt"};
+            .m_history_filename = filename,
+        };
 
         ASSERT_EQ(NNCli_Init(&option), NN_CLI__SUCCESS);
 
