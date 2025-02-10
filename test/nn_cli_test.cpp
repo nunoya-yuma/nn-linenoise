@@ -10,6 +10,48 @@ namespace
     {
         // Nothing to do
         return NN_CLI__SUCCESS;
+// Additional Unit Tests for NNCli_RegisterCommand, NNCli_Init, and NNCli_Run
+
+// Mock command function for testing
+NNCli_Err_t SampleCmd(int argc, char **argv) {
+    return NN_CLI__SUCCESS;
+}
+
+// Test fixture for NNCli module tests
+class NNCliTest : public ::testing::Test {
+protected:
+    void SetUp() override {
+        // Setup can include reset of any static command registration if applicable
+    }
+
+    void TearDown() override {
+        // Clean up if necessary
+    }
+};
+
+TEST_F(NNCliTest, RegisterCommandSuccess) {
+    // Assuming NNCli_RegisterCommand returns NN_CLI__SUCCESS on success
+    NNCli_Err_t ret = NNCli_RegisterCommand("test", SampleCmd);
+    EXPECT_EQ(ret, NN_CLI__SUCCESS);
+}
+
+TEST_F(NNCliTest, RegisterCommandDuplicate) {
+    // First registration should succeed, second might fail if duplicate names are not allowed
+    NNCli_RegisterCommand("dup", SampleCmd);
+    NNCli_Err_t ret = NNCli_RegisterCommand("dup", SampleCmd);
+    // Depending on implementation, duplicate might be an error. Here we assume it returns error code.
+    EXPECT_NE(ret, NN_CLI__SUCCESS);
+}
+
+TEST_F(NNCliTest, InitSuccess) {
+    // NNCli_Init should properly initialize the CLI system
+    NNCli_Err_t ret = NNCli_Init();
+    EXPECT_EQ(ret, NN_CLI__SUCCESS);
+}
+
+TEST_F(NNCliTest, RunValidCommand) {
+    // Test NNCli_Run using a valid command
+    NNCli_RegisterCommand("run", SampleCmd);
     }
 
     void DummyKeyboardInput(const char *input)
