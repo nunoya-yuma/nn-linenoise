@@ -10,6 +10,31 @@ namespace
     {
         // Nothing to do
         return NN_CLI__SUCCESS;
+// Additional unit tests for NNCli_RegisterCommand, NNCli_Init, and NNCli_Run functions
+TEST(NNCliTest, RegisterCommand_Success) {
+    // Initialize CLI system
+    EXPECT_EQ(NNCli_Init(), NN_CLI__SUCCESS);
+    // Register a new command with name "test" and function pointer TestCmdFunc.
+    EXPECT_EQ(NNCli_RegisterCommand("test", TestCmdFunc), NN_CLI__SUCCESS);
+}
+
+TEST(NNCliTest, RegisterCommand_Duplicate) {
+    // Initialize CLI system
+    EXPECT_EQ(NNCli_Init(), NN_CLI__SUCCESS);
+    // Register the same command twice should succeed first then fail
+    EXPECT_EQ(NNCli_RegisterCommand("dup", TestCmdFunc), NN_CLI__SUCCESS);
+    // Attempting duplicate registration should not return success. Assuming error code is not NN_CLI__SUCCESS.
+    EXPECT_NE(NNCli_RegisterCommand("dup", TestCmdFunc), NN_CLI__SUCCESS);
+}
+
+TEST(NNCliTest, Init_Success) {
+    // Calling Init should return success
+    EXPECT_EQ(NNCli_Init(), NN_CLI__SUCCESS);
+}
+
+TEST(NNCliTest, Run_NoCommand) {
+    // Run with no extra command; expect error.
+    const char* argv[] = {"nncli"};
     }
 
     void DummyKeyboardInput(const char *input)
