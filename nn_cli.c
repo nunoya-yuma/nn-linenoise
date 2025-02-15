@@ -331,6 +331,16 @@ NNCli_Err_t NNCli_RegisterCommand(const NNCli_Command_t *a_cmd)
         goto done;
     }
 
+    for (size_t i = 0; i < s_command_list.m_num; i++)
+    {
+        if (strcmp(s_command_list.m_command[i]->m_name, a_cmd->m_name) == 0)
+        {
+            NNCli_LogError("%s command is already registered", a_cmd->m_name);
+            res = NN_CLI__DUPLICATE;
+            goto done;
+        }
+    }
+
     s_command_list.m_command[s_command_list.m_num] = a_cmd;
     s_command_list.m_num++;
 
