@@ -62,7 +62,7 @@ namespace testing
 {
     TEST_F(NNCliTest, RegisterCommand_Success)
     {
-        constexpr NNCli_Command_t cmd = {
+        const NNCli_Command_t cmd = {
             .m_func = TestCmdFunc,
             .m_name = "test-cmd",
             .m_options = "on/off",
@@ -71,7 +71,7 @@ namespace testing
 
         ASSERT_EQ(NNCli_RegisterCommand(&cmd), NN_CLI__SUCCESS);
 
-        constexpr NNCli_Command_t no_option_cmd = {
+        const NNCli_Command_t no_option_cmd = {
             .m_func = TestCmdFunc,
             .m_name = "no-option-test-cmd",
             .m_options = nullptr,
@@ -84,7 +84,7 @@ namespace testing
     {
         ASSERT_EQ(NNCli_RegisterCommand(nullptr), NN_CLI__INVALID_ARGS);
 
-        constexpr NNCli_Command_t no_func_cmd = {
+        const NNCli_Command_t no_func_cmd = {
             .m_func = nullptr,
             .m_name = "test-cmd",
             .m_options = "on/off",
@@ -92,7 +92,7 @@ namespace testing
         };
         ASSERT_EQ(NNCli_RegisterCommand(&no_func_cmd), NN_CLI__INVALID_ARGS);
 
-        constexpr NNCli_Command_t no_name_cmd = {
+        const NNCli_Command_t no_name_cmd = {
             .m_func = TestCmdFunc,
             .m_name = "",
             .m_options = "on/off",
@@ -120,7 +120,7 @@ namespace testing
             ASSERT_EQ(NNCli_RegisterCommand(&cmds[i]), NN_CLI__SUCCESS);
         }
 
-        constexpr NNCli_Command_t cmd = {
+        const NNCli_Command_t cmd = {
             .m_func = TestCmdFunc,
             .m_name = "upper-limit-test-cmd",
             .m_options = "on/off",
@@ -131,7 +131,7 @@ namespace testing
 
     TEST_F(NNCliTest, RegisterCommand_PreventDuplicate)
     {
-        constexpr NNCli_Command_t cmd = {
+        const NNCli_Command_t cmd = {
             .m_func = TestCmdFunc,
             .m_name = "test-cmd",
             .m_options = "on/off",
@@ -182,7 +182,7 @@ namespace testing
     TEST_F(NNCliTest, Run_Success)
     {
 
-        constexpr NNCli_Command_t cmd = {
+        const NNCli_Command_t cmd = {
             .m_func = TestCmdFunc,
             .m_name = "test-cmd",
             .m_options = "on/off",
