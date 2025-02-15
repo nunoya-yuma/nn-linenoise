@@ -122,7 +122,7 @@ static NNCli_Err_t GetInputAsync(char **out_string)
     /* Asynchronous mode using the multiplexing API: wait for
      * data on stdin, and simulate async data coming from some source
      * using the select(2) timeout. */
-    NNCli_Err_t ret = NN_CLI_IN_PROGRESS;
+    NNCli_Err_t ret = NN_CLI__IN_PROGRESS;
     static bool s_requires_init = true;
     static struct linenoiseState ls;
     static char buf[1024];
@@ -437,7 +437,7 @@ NNCli_Err_t NNCli_Run(void)
     if (s_async.m_enabled)
     {
         NNCli_Err_t ret_async = GetInputAsync(&line);
-        if (ret_async == NN_CLI_IN_PROGRESS)
+        if (ret_async == NN_CLI__IN_PROGRESS)
         {
             goto done;
         }
