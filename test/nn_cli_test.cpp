@@ -208,3 +208,12 @@ namespace testing
         ASSERT_EQ(NNCli_Run(), NN_CLI__SUCCESS);
     }
 } // namespace testing
+TEST_F(NNCliTest, RegisterCommand_Duplicate) {
+    constexpr NNCli_Command_t dup_cmd = {
+        .m_func = TestCmdFunc,
+        .m_name = "duplicate-cmd",
+        .m_options = "option",
+        .m_help_msg = "duplicate test",
+    };
+    ASSERT_EQ(NNCli_RegisterCommand(&dup_cmd), NN_CLI__SUCCESS);
+    ASSERT_EQ(NNCli_RegisterCommand(&dup_cmd), NN_CLI__INVALID_ARGS);
