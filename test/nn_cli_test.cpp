@@ -139,6 +139,19 @@ namespace testing
         ASSERT_EQ(NNCli_RegisterCommand(&no_name_cmd), NN_CLI__INVALID_ARGS);
     }
 
+    TEST_F(NNCliTest, NNCliTest_RegisterCommand_PreventDuplicate)
+    {
+        constexpr NNCli_Command_t cmd = {
+            .m_func = TestCmdFunc,
+            .m_name = "test-cmd",
+            .m_options = "on/off",
+            .m_help_msg = "test help msg",
+        };
+
+        ASSERT_EQ(NNCli_RegisterCommand(&cmd), NN_CLI__SUCCESS);
+        ASSERT_EQ(NNCli_RegisterCommand(&cmd), NN_CLI__DUPLICATE);
+    }
+
     TEST_F(NNCliTest, Init_Success)
     {
         char filename[] = "/tmp/nncli_test_history_XXXXXX";

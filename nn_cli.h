@@ -12,6 +12,7 @@ typedef enum
     NN_CLI__EXTERNAL_LIB_ERROR, // Errors in external libraries or tools used
     NN_CLI__PROCESS_COMPLETED,  // This indicates that the process has been completed, but it may have been completed successfully.
     NN_CLI_IN_PROGRESS,         // It means that the process is in progress internally. This may not always be an error.
+    NN_CLI__DUPLICATE           // It means that the data is duplicated.
 } NNCli_Err_t;
 
 typedef NNCli_Err_t (*NNCli_Func_t)(int argc, char **argv);
