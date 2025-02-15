@@ -323,6 +323,13 @@ NNCli_Err_t NNCli_RegisterCommand(const NNCli_Command_t *a_cmd)
         res = NN_CLI__INVALID_ARGS;
         goto done;
     }
+    for (size_t i = 0; i < s_command_list.m_num; i++) {
+        if (strcmp(s_command_list.m_command[i]->m_name, a_cmd->m_name) == 0) {
+            NNCli_LogError("Command with the same name is already registered");
+            res = NN_CLI__INVALID_ARGS;
+            goto done;
+        }
+    }
 
     if (s_command_list.m_num >= NN_CLI__MAX_COMMAND_NUM)
     {
