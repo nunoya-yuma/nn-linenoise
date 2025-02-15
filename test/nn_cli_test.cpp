@@ -73,7 +73,7 @@ namespace testing
 
         constexpr NNCli_Command_t no_option_cmd = {
             .m_func = TestCmdFunc,
-            .m_name = "test-cmd",
+            .m_name = "no-option-test-cmd",
             .m_options = nullptr,
             .m_help_msg = "test help msg",
         };
@@ -103,18 +103,29 @@ namespace testing
 
     TEST_F(NNCliTest, RegisterCommand_upperLimit)
     {
-        constexpr NNCli_Command_t cmd = {
-            .m_func = TestCmdFunc,
-            .m_name = "test-cmd",
-            .m_options = "on/off",
-            .m_help_msg = "test help msg",
-        };
+        NNCli_Command_t cmds[NN_CLI__MAX_COMMAND_NUM];
+        std::string cmd_names[NN_CLI__MAX_COMMAND_NUM];
 
         for (int i = 0; i < NN_CLI__MAX_COMMAND_NUM; i++)
         {
-            ASSERT_EQ(NNCli_RegisterCommand(&cmd), NN_CLI__SUCCESS);
+            cmd_names[i] = "test-cmd" + std::to_string(i);
+            NNCli_Command_t cmd = {
+                .m_func = TestCmdFunc,
+                .m_name = cmd_names[i].c_str(),
+                .m_options = "on/off",
+                .m_help_msg = "test help msg",
+            };
+            cmds[i] = cmd;
+
+            ASSERT_EQ(NNCli_RegisterCommand(&cmds[i]), NN_CLI__SUCCESS);
         }
 
+        constexpr NNCli_Command_t cmd = {
+            .m_func = TestCmdFunc,
+            .m_name = "upper-limit-test-cmd",
+            .m_options = "on/off",
+            .m_help_msg = "test help msg",
+        };
         ASSERT_EQ(NNCli_RegisterCommand(&cmd), NN_CLI__EXCEED_CAPACITY);
     }
 
