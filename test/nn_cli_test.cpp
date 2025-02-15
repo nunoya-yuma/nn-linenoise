@@ -129,7 +129,7 @@ namespace testing
         ASSERT_EQ(NNCli_RegisterCommand(&cmd), NN_CLI__EXCEED_CAPACITY);
     }
 
-    TEST_F(NNCliTest, NNCliTest_RegisterCommand_InvalidArgs)
+    TEST_F(NNCliTest, RegisterCommand_InvalidArgs)
     {
         ASSERT_EQ(NNCli_RegisterCommand(nullptr), NN_CLI__INVALID_ARGS);
 
@@ -150,7 +150,7 @@ namespace testing
         ASSERT_EQ(NNCli_RegisterCommand(&no_name_cmd), NN_CLI__INVALID_ARGS);
     }
 
-    TEST_F(NNCliTest, NNCliTest_RegisterCommand_PreventDuplicate)
+    TEST_F(NNCliTest, RegisterCommand_PreventDuplicate)
     {
         constexpr NNCli_Command_t cmd = {
             .m_func = TestCmdFunc,
