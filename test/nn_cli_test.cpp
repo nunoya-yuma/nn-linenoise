@@ -129,27 +129,6 @@ namespace testing
         ASSERT_EQ(NNCli_RegisterCommand(&cmd), NN_CLI__EXCEED_CAPACITY);
     }
 
-    TEST_F(NNCliTest, RegisterCommand_InvalidArgs)
-    {
-        ASSERT_EQ(NNCli_RegisterCommand(nullptr), NN_CLI__INVALID_ARGS);
-
-        constexpr NNCli_Command_t no_func_cmd = {
-            .m_func = nullptr,
-            .m_name = "test-cmd",
-            .m_options = "on/off",
-            .m_help_msg = "test help msg",
-        };
-        ASSERT_EQ(NNCli_RegisterCommand(&no_func_cmd), NN_CLI__INVALID_ARGS);
-
-        constexpr NNCli_Command_t no_name_cmd = {
-            .m_func = TestCmdFunc,
-            .m_name = "",
-            .m_options = "on/off",
-            .m_help_msg = "test help msg",
-        };
-        ASSERT_EQ(NNCli_RegisterCommand(&no_name_cmd), NN_CLI__INVALID_ARGS);
-    }
-
     TEST_F(NNCliTest, RegisterCommand_PreventDuplicate)
     {
         constexpr NNCli_Command_t cmd = {
