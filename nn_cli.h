@@ -10,8 +10,8 @@ typedef enum
     NN_CLI__INVALID_ARGS,       // Input arguments are incorrect.
     NN_CLI__EXCEED_CAPACITY,    // The size limit for arrays, etc. has been reached.
     NN_CLI__EXTERNAL_LIB_ERROR, // Errors in external libraries or tools used
-    NN_CLI__PROCESS_COMPLETED,  // This indicates that the process has been completed, but it may have been completed successfully.
-    NN_CLI_IN_PROGRESS,         // It means that the process is in progress internally. This may not always be an error.
+    NN_CLI__PROCESS_COMPLETED,  // It means that the process has been completed, but it may have been completed successfully.
+    NN_CLI__IN_PROGRESS,        // It means that the process is in progress internally. This may not always be an error.
     NN_CLI__DUPLICATE           // It means that the data is duplicated.
 } NNCli_Err_t;
 
