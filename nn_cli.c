@@ -13,6 +13,27 @@
 #define MAX_NUM_OF_WORDS_PER_COMMAND 20
 #define COMMAND_STRING_MAX_LEN 1024
 
+#define NNCli_AssertWithMsg(cond, ...) \
+    if (!(cond))                       \
+    {                                  \
+        NNCli_LogError(__VA_ARGS__);   \
+        NNCli_Assert(cond);            \
+    }
+
+#define NNCli_AssertOrReturn(cond, res, ...)    \
+    if (!(cond))                                \
+    {                                           \
+        NNCli_AssertWithMsg(cond, __VA_ARGS__); \
+        return res;                             \
+    }
+
+#define NNCli_AssertOrReturnVoid(cond, ...)     \
+    if (!(cond))                                \
+    {                                           \
+        NNCli_AssertWithMsg(cond, __VA_ARGS__); \
+        return;                                 \
+    }
+
 typedef struct
 {
     const NNCli_Command_t *m_command[NN_CLI__MAX_COMMAND_NUM];
@@ -25,8 +46,8 @@ static char *s_history_filename;
 
 static void completion(const char *buf, linenoiseCompletions *lc)
 {
-    NNCli_Assert(buf);
-    NNCli_Assert(lc);
+    NNCli_AssertOrReturnVoid(buf, "buf is NULL");
+    NNCli_AssertOrReturnVoid(lc, "lc is NULL");
 
     bool found = false;
     for (int i = 0; i < s_command_list.m_num; i++)
@@ -47,9 +68,9 @@ static void completion(const char *buf, linenoiseCompletions *lc)
 
 static char *hints(const char *buf, int *color, int *bold)
 {
-    NNCli_Assert(buf);
-    NNCli_Assert(color);
-    NNCli_Assert(bold);
+    NNCli_AssertOrReturn(buf, NULL, "buf is NULL");
+    NNCli_AssertOrReturn(color, NULL, "color is NULL");
+    NNCli_AssertOrReturn(bold, NULL, "bold is NULL");
 
     static char option_str[COMMAND_STRING_MAX_LEN];
     memset(option_str, 0, sizeof(option_str));
@@ -74,8 +95,8 @@ static char *hints(const char *buf, int *color, int *bold)
 
 static int SplitStringWithSpace(const char *a_raw_command, char **out_tokens)
 {
-    NNCli_Assert(a_raw_command);
-    NNCli_Assert(out_tokens);
+    NNCli_AssertOrReturn(a_raw_command, -1, "a_raw_command is NULL");
+    NNCli_AssertOrReturn(out_tokens, -1, "out_tokens is NULL");
 
     static char strCopy[COMMAND_STRING_MAX_LEN];
     strncpy(strCopy, a_raw_command, sizeof(strCopy) - 1);
@@ -96,7 +117,7 @@ static int SplitStringWithSpace(const char *a_raw_command, char **out_tokens)
 
 static void CallRegisteredCommand(const char *a_command)
 {
-    NNCli_Assert(a_command);
+    NNCli_AssertOrReturnVoid(a_command, "a_command is NULL");
 
     for (int i = 0; i < s_command_list.m_num; i++)
     {
@@ -270,7 +291,8 @@ static void RegisterDefaultCommand(void)
         .m_options = NULL,
         .m_help_msg = "Show registered commands",
     };
-    NNCli_Assert(NNCli_RegisterCommand(&help_command) == NN_CLI__SUCCESS);
+    NNCli_Err_t help_res = NNCli_RegisterCommand(&help_command);
+    NNCli_AssertWithMsg(help_res == NN_CLI__SUCCESS, "Failed to register help command: %d", help_res);
 
     static const NNCli_Command_t history_len_command = {
         .m_func = HistoryLenCommand,
@@ -278,7 +300,8 @@ static void RegisterDefaultCommand(void)
         .m_options = "size",
         .m_help_msg = "Set the number of histories to keep",
     };
-    NNCli_Assert(NNCli_RegisterCommand(&history_len_command) == NN_CLI__SUCCESS);
+    NNCli_Err_t history_len_res = NNCli_RegisterCommand(&history_len_command);
+    NNCli_AssertWithMsg(history_len_res == NN_CLI__SUCCESS, "Failed to register historylen command: %d", history_len_res);
 
     static const NNCli_Command_t mask_command = {
         .m_func = MaskCommand,
@@ -286,7 +309,8 @@ static void RegisterDefaultCommand(void)
         .m_options = "on/off",
         .m_help_msg = "Turn on/off masking of input characters <on/off>",
     };
-    NNCli_Assert(NNCli_RegisterCommand(&mask_command) == NN_CLI__SUCCESS);
+    NNCli_Err_t mask_res = NNCli_RegisterCommand(&mask_command);
+    NNCli_AssertWithMsg(mask_res == NN_CLI__SUCCESS, "Failed to register mask command: %d", mask_res);
 }
 
 static bool CheckOrCreateFile(const char *filename)
