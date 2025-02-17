@@ -1,7 +1,7 @@
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <getopt.h>
 
 #include "nn_cli.h"
 
@@ -20,21 +20,21 @@ static const char *GetStringFromSampleStatus(SampleStatus_t a_status)
 
     switch (a_status)
     {
-    case SAMPLE_STATUS_INVALID:
-        status_str = "Invalid";
-        break;
+        case SAMPLE_STATUS_INVALID:
+            status_str = "Invalid";
+            break;
 
-    case SAMPLE_STATUS_ON:
-        status_str = "on";
-        break;
+        case SAMPLE_STATUS_ON:
+            status_str = "on";
+            break;
 
-    case SAMPLE_STATUS_OFF:
-        status_str = "off";
-        break;
+        case SAMPLE_STATUS_OFF:
+            status_str = "off";
+            break;
 
-    default:
-        printf("[NN] Error: Unexpected status\n");
-        break;
+        default:
+            printf("[NN] Error: Unexpected status\n");
+            break;
     }
 
     return status_str;
@@ -84,11 +84,13 @@ static NNCli_Err_t Sample_CtrlCmd(int argc, char **argv)
 
     if (s_sample_status == pre_status)
     {
-        printf("Sample status does not change: '%s'\n", GetStringFromSampleStatus(s_sample_status));
+        printf("Sample status does not change: '%s'\n",
+               GetStringFromSampleStatus(s_sample_status));
     }
     else
     {
-        printf("Sample status changed to '%s'\n", GetStringFromSampleStatus(s_sample_status));
+        printf("Sample status changed to '%s'\n",
+               GetStringFromSampleStatus(s_sample_status));
     }
 
 done:
@@ -109,41 +111,47 @@ static NNCli_Option_t parse_args_and_get_option(int argc, char **argv)
         {0, 0, 0, 0},
     };
 
-    while ((opt = getopt_long(argc, argv, "hakm", long_options, &option_index)) != -1)
+    while ((opt = getopt_long(argc, argv, "hakm", long_options,
+                              &option_index)) != -1)
     {
         switch (opt)
         {
-        case 'h':
-            printf("Usage: %s [options]\n", argv[0]);
-            printf("Options:\n");
-            printf("  -h, --help    Show this help message\n");
-            printf("  -a, --async    Input processing is asynchronous.\n");
-            printf("  -k, --key-codes    Displays the code of the character typed in.\n");
-            printf("  -m, --multi-line    The string will automatically wrap when it reaches the edge of the screen.\n");
-            exit(0);
+            case 'h':
+                printf("Usage: %s [options]\n", argv[0]);
+                printf("Options:\n");
+                printf("  -h, --help    Show this help message\n");
+                printf("  -a, --async    Input processing is asynchronous.\n");
+                printf(
+                    "  -k, --key-codes    Displays the code of the character "
+                    "typed in.\n");
+                printf(
+                    "  -m, --multi-line    The string will automatically wrap "
+                    "when it reaches the edge of the screen.\n");
+                exit(0);
 
-        case 'a':
-            ret_option.m_async.m_enabled = true;
-            // By setting this timeout, input is monitored for 1 second before exiting the process.
-            ret_option.m_async.m_timeout.tv_sec = 1;
-            ret_option.m_async.m_timeout.tv_usec = 0;
-            break;
+            case 'a':
+                ret_option.m_async.m_enabled = true;
+                // By setting this timeout, input is monitored for 1 second
+                // before exiting the process.
+                ret_option.m_async.m_timeout.tv_sec = 1;
+                ret_option.m_async.m_timeout.tv_usec = 0;
+                break;
 
-        case 'k':
-            ret_option.m_show_key_codes = true;
-            break;
+            case 'k':
+                ret_option.m_show_key_codes = true;
+                break;
 
-        case 'm':
-            ret_option.m_enable_multi_line = true;
-            break;
+            case 'm':
+                ret_option.m_enable_multi_line = true;
+                break;
 
-        case '?':
-            fprintf(stderr, "Invalid option\n");
-            exit(1);
+            case '?':
+                fprintf(stderr, "Invalid option\n");
+                exit(1);
 
-        default:
-            fprintf(stderr, "Unexpected case\n");
-            exit(1);
+            default:
+                fprintf(stderr, "Unexpected case\n");
+                exit(1);
         }
     }
 

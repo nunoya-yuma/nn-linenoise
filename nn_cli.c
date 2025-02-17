@@ -5,10 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/select.h>
-#include "linenoise.h"
+#include <sys/stat.h>
 
 #include "check_config.h"
-#include <sys/stat.h>
+#include "linenoise.h"
 
 #define MAX_NUM_OF_WORDS_PER_COMMAND 20
 #define COMMAND_STRING_MAX_LEN 1024
@@ -59,7 +59,8 @@ static void completion(const char *buf, linenoiseCompletions *lc)
         }
     }
 
-    // If no candidate command exists, leave it as is and do not add a space by tab.
+    // If no candidate command exists, leave it as is and do not add a space by
+    // tab.
     if (!found)
     {
         linenoiseAddCompletion(lc, buf);
@@ -84,8 +85,10 @@ static char *hints(const char *buf, int *color, int *bold)
             s_command_list.m_command[i]->m_options != NULL)
         {
             option_str[0] = ' ';
-            // 2 byte (subtracted at the end ) = 1 byte (for the first move) + 1 byte (of the last null character)
-            strncpy(&option_str[1], s_command_list.m_command[i]->m_options, sizeof(option_str) - 2);
+            // 2 byte (subtracted at the end ) = 1 byte (for the first move) + 1
+            // byte (of the last null character)
+            strncpy(&option_str[1], s_command_list.m_command[i]->m_options,
+                    sizeof(option_str) - 2);
             break;
         }
     }
@@ -126,9 +129,12 @@ static void CallRegisteredCommand(const char *a_command)
         const char *first_command = args[0];
         if (strcmp(first_command, s_command_list.m_command[i]->m_name) == 0)
         {
-            if (s_command_list.m_command[i]->m_func(argc, args) != NN_CLI__SUCCESS)
+            if (s_command_list.m_command[i]->m_func(argc, args) !=
+                NN_CLI__SUCCESS)
             {
-                NNCli_LogWarn("Command args are incorrect. %s | %s", s_command_list.m_command[i]->m_name, s_command_list.m_command[i]->m_help_msg);
+                NNCli_LogWarn("Command args are incorrect. %s | %s",
+                              s_command_list.m_command[i]->m_name,
+                              s_command_list.m_command[i]->m_help_msg);
             }
             return;
         }
@@ -228,7 +234,8 @@ static void ShowAllCommands(void)
 {
     for (int i = 0; i < s_command_list.m_num; i++)
     {
-        printf("%s: %s\n", s_command_list.m_command[i]->m_name, s_command_list.m_command[i]->m_help_msg);
+        printf("%s: %s\n", s_command_list.m_command[i]->m_name,
+               s_command_list.m_command[i]->m_help_msg);
     }
 }
 
@@ -292,7 +299,8 @@ static void RegisterDefaultCommand(void)
         .m_help_msg = "Show registered commands",
     };
     NNCli_Err_t help_res = NNCli_RegisterCommand(&help_command);
-    NNCli_AssertWithMsg(help_res == NN_CLI__SUCCESS, "Failed to register help command: %d", help_res);
+    NNCli_AssertWithMsg(help_res == NN_CLI__SUCCESS,
+                        "Failed to register help command: %d", help_res);
 
     static const NNCli_Command_t history_len_command = {
         .m_func = HistoryLenCommand,
@@ -301,7 +309,9 @@ static void RegisterDefaultCommand(void)
         .m_help_msg = "Set the number of histories to keep",
     };
     NNCli_Err_t history_len_res = NNCli_RegisterCommand(&history_len_command);
-    NNCli_AssertWithMsg(history_len_res == NN_CLI__SUCCESS, "Failed to register historylen command: %d", history_len_res);
+    NNCli_AssertWithMsg(history_len_res == NN_CLI__SUCCESS,
+                        "Failed to register historylen command: %d",
+                        history_len_res);
 
     static const NNCli_Command_t mask_command = {
         .m_func = MaskCommand,
@@ -310,7 +320,8 @@ static void RegisterDefaultCommand(void)
         .m_help_msg = "Turn on/off masking of input characters <on/off>",
     };
     NNCli_Err_t mask_res = NNCli_RegisterCommand(&mask_command);
-    NNCli_AssertWithMsg(mask_res == NN_CLI__SUCCESS, "Failed to register mask command: %d", mask_res);
+    NNCli_AssertWithMsg(mask_res == NN_CLI__SUCCESS,
+                        "Failed to register mask command: %d", mask_res);
 }
 
 static bool CheckOrCreateFile(const char *filename)
@@ -341,7 +352,8 @@ NNCli_Err_t NNCli_RegisterCommand(const NNCli_Command_t *a_cmd)
 {
     NNCli_Err_t res = NN_CLI__SUCCESS;
     // Allow m_options to be NULL.
-    if (a_cmd == NULL || a_cmd->m_func == NULL || a_cmd->m_name == NULL || a_cmd->m_help_msg == NULL || strlen(a_cmd->m_name) == 0)
+    if (a_cmd == NULL || a_cmd->m_func == NULL || a_cmd->m_name == NULL ||
+        a_cmd->m_help_msg == NULL || strlen(a_cmd->m_name) == 0)
     {
         NNCli_LogError("An invalid command was attempted to be registered");
         res = NN_CLI__INVALID_ARGS;
@@ -350,7 +362,9 @@ NNCli_Err_t NNCli_RegisterCommand(const NNCli_Command_t *a_cmd)
 
     if (s_command_list.m_num >= NN_CLI__MAX_COMMAND_NUM)
     {
-        NNCli_LogError("The maximum number of commands that can be registered has been exceeded");
+        NNCli_LogError(
+            "The maximum number of commands that can be registered has been "
+            "exceeded");
         res = NN_CLI__EXCEED_CAPACITY;
         goto done;
     }
@@ -406,7 +420,8 @@ NNCli_Err_t NNCli_Init(const NNCli_Option_t *a_option)
     if (a_option->m_show_key_codes)
     {
         NNCli_LogInfo("Print key codes mode enabled");
-        // Enter a loop within this function and stop the program after it finishes by "quit"
+        // Enter a loop within this function and stop the program after it
+        // finishes by "quit"
         linenoisePrintKeyCodes();
         exit(0);
     }
@@ -416,8 +431,10 @@ NNCli_Err_t NNCli_Init(const NNCli_Option_t *a_option)
         s_async = a_option->m_async;
     }
 
-    // This is not released by free() until the end, because it is used to save the command each time.
-    s_history_filename = (char *)malloc(strlen(a_option->m_history_filename) + 1);
+    // This is not released by free() until the end, because it is used to save
+    // the command each time.
+    s_history_filename =
+        (char *)malloc(strlen(a_option->m_history_filename) + 1);
     if (s_history_filename == NULL)
     {
         res = NN_CLI__GENERAL_ERROR;
@@ -450,7 +467,8 @@ done:
 
 /* Now this is the main loop of the typical linenoise-based application.
  * The call to linenoise() will block as long as the user types something
- * and presses enter. linenoise() is called at GetInputAsync() and GetInputSync().
+ * and presses enter. linenoise() is called at GetInputAsync() and
+ * GetInputSync().
  *
  * The typed string is returned as a malloc() allocated string by
  * linenoise, so the user needs to free() it. */
@@ -480,8 +498,9 @@ NNCli_Err_t NNCli_Run(void)
     if (line[0] != '\0')
     {
         CallRegisteredCommand(line);
-        linenoiseHistoryAdd(line);                /* Add to the history. */
-        linenoiseHistorySave(s_history_filename); /* Save the history on disk. */
+        linenoiseHistoryAdd(line); /* Add to the history. */
+        linenoiseHistorySave(
+            s_history_filename); /* Save the history on disk. */
     }
     free(line);
 
