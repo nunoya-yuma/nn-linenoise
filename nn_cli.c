@@ -342,10 +342,10 @@ static bool CheckOrCreateFile(const char *filename)
     return true;
 }
 
+static bool IsInitialized(void) { return s_command_list.m_num > 0; }
+
 /**
- *
  * Public functions
- *
  */
 
 NNCli_Err_t NNCli_RegisterCommand(const NNCli_Command_t *a_cmd)
@@ -474,8 +474,14 @@ done:
  * linenoise, so the user needs to free() it. */
 NNCli_Err_t NNCli_Run(void)
 {
-    NNCli_Err_t err;
+    NNCli_Err_t err = NN_CLI__NOT_READY;
     char *line;
+    if (!IsInitialized())
+    {
+        NNCli_LogError("NNCli is not initialized");
+        goto done;
+    }
+
     if (s_async.m_enabled)
     {
         err = GetInputAsync(&line);
