@@ -206,4 +206,7 @@ TEST_F(NNCliTest, Run_Success)
     DummyKeyboardInput("help\n");
     ASSERT_EQ(NNCli_Run(), NN_CLI__SUCCESS);
 }
+
+TEST_F(NNCliTest, Run_BeforeInit) { ASSERT_EQ(NNCli_Run(), NN_CLI__NOT_READY); }
+
 }  // namespace testing
