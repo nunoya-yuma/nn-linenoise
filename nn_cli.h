@@ -16,7 +16,8 @@ typedef enum
                                 // but it may have been completed successfully.
     NN_CLI__IN_PROGRESS,        // It means that the process is in progress
                                 // internally. This may not always be an error.
-    NN_CLI__DUPLICATE           // It means that the data is duplicated.
+    NN_CLI__DUPLICATE,          // It means that the data is duplicated.
+    NN_CLI__NOT_READY,          // The function or module is not ready yet.
 } NNCli_Err_t;
 
 typedef NNCli_Err_t (*NNCli_Func_t)(int argc, char **argv);
