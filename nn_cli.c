@@ -474,22 +474,21 @@ done:
  * linenoise, so the user needs to free() it. */
 NNCli_Err_t NNCli_Run(void)
 {
-    NNCli_Err_t err = NN_CLI__SUCCESS;
+    NNCli_Err_t err;
     char *line;
     if (s_async.m_enabled)
     {
-        NNCli_Err_t ret_async = GetInputAsync(&line);
-        if (ret_async == NN_CLI__IN_PROGRESS)
+        err = GetInputAsync(&line);
+        if (err != NN_CLI__SUCCESS)
         {
             goto done;
         }
     }
     else
     {
-        NNCli_Err_t ret_sync = GetInputSync(&line);
-        if (ret_sync != NN_CLI__SUCCESS)
+        err = GetInputSync(&line);
+        if (err != NN_CLI__SUCCESS)
         {
-            err = ret_sync;
             goto done;
         }
     }
