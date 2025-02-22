@@ -142,6 +142,46 @@ TEST_F(NNCliTest, RegisterCommand_PreventDuplicate)
     ASSERT_EQ(NNCli_RegisterCommand(&cmd), NN_CLI__DUPLICATE);
 }
 
+TEST_F(NNCliTest, RegisterCommand_DuringOperation)
+{
+    const NNCli_Command_t cmd = {
+        .m_func = TestCmdFunc,
+        .m_name = "test-cmd",
+        .m_options = "on/off",
+        .m_help_msg = "test help msg",
+    };
+    ASSERT_EQ(NNCli_RegisterCommand(&cmd), NN_CLI__SUCCESS);
+
+    char filename[] = "/tmp/nncli_test_history_XXXXXX";
+    GenerateDummyHistoryFile(filename);
+    const NNCli_Option_t option = {
+        .m_enable_multi_line = true,
+        .m_show_key_codes = false,
+        .m_async =
+            {
+                .m_enabled = false,
+                .m_timeout = {.tv_sec = 0, .tv_usec = 0},
+            },
+        .m_history_filename = filename,
+    };
+
+    ASSERT_EQ(NNCli_Init(&option), NN_CLI__SUCCESS);
+
+    DummyKeyboardInput("help\n");
+    ASSERT_EQ(NNCli_Run(), NN_CLI__SUCCESS);
+
+    const NNCli_Command_t additional_cmd = {
+        .m_func = TestCmdFunc,
+        .m_name = "test-additional-cmd",
+        .m_options = "on/off",
+        .m_help_msg = "test help msg",
+    };
+    ASSERT_EQ(NNCli_RegisterCommand(&additional_cmd), NN_CLI__SUCCESS);
+
+    DummyKeyboardInput("test-additional-cmd\n");
+    ASSERT_EQ(NNCli_Run(), NN_CLI__SUCCESS);
+}
+
 TEST_F(NNCliTest, Init_Success)
 {
     char filename[] = "/tmp/nncli_test_history_XXXXXX";
