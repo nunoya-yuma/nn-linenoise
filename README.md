@@ -32,3 +32,15 @@ cmake --build build
 # Run
 ./build/test/nn_cli_test
 ```
+
+## Try integration test
+
+### Preparation
+
+```shell
+sudo apt update
+sudo apt install -y python3 python3-venv python3-pip
+python3 -m venv venv
+source venv/bin/activate
+pip install git+https://github.com/nunoya-yuma/blabot.git@v0.1.0
+```
