@@ -25,7 +25,17 @@ def example_cli() -> Generator[ProcessIO, None, None]:
     example_cli.stop()
 
 
+def test_default_command(example_cli: ProcessIO) -> None:
+    print("=== Default command ===")
+    # Not registered command
+    assert example_cli.run_command("invalid-command", "Command not found")
+
+    # help command
+    assert example_cli.run_command("help", "help: Show registered commands")
+
+
 def test_sample_command(example_cli: ProcessIO) -> None:
+    print("=== Sample command: normal case ===")
     assert example_cli.run_command("sample-status", "Sample status: 'Invalid'")
 
     assert example_cli.run_command(
@@ -35,3 +45,7 @@ def test_sample_command(example_cli: ProcessIO) -> None:
     assert example_cli.run_command(
         "sample-ctrl off", "Sample status changed to 'off'")
     assert example_cli.run_command("sample-status", "Sample status: 'off'")
+
+    print("=== Sample command: invalid argument ===")
+    assert example_cli.run_command("sample-status invalid", "Error input!")
+    assert example_cli.run_command("sample-ctrl", "Error input!")
