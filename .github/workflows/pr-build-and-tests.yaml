@@ -34,3 +34,12 @@ jobs:
             cmake -S . -B build -G Ninja
             cmake --build build
             ./build/test/nn_cli_test
+
+        - name: Install dependencies for integration tests
+          run: |
+            pip3 install -r test/integration/requirements.txt
+
+        - name: Run integration tests
+          run: |
+            cd test/
+            pytest -vs integration
