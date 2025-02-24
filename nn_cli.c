@@ -43,6 +43,7 @@ typedef struct
 static NNCli_AsyncOption_t s_async;
 static CommandList_t s_command_list;
 static char *s_history_filename;
+static bool s_is_initialized = false;
 
 static void completion(const char *buf, linenoiseCompletions *lc)
 {
@@ -342,7 +343,7 @@ static bool CheckOrCreateFile(const char *filename)
     return true;
 }
 
-static bool IsInitialized(void) { return s_command_list.m_num > 0; }
+static bool IsInitialized(void) { return s_is_initialized; }
 
 /**
  * Public functions
@@ -388,7 +389,13 @@ done:
 
 NNCli_Err_t NNCli_Init(const NNCli_Option_t *a_option)
 {
-    NNCli_Err_t res = NN_CLI__INVALID_ARGS;
+    NNCli_Err_t res = NN_CLI__IN_PROGRESS;
+    if (IsInitialized())
+    {
+        goto done;
+    }
+
+    res = NN_CLI__INVALID_ARGS;
     if (a_option == NULL)
     {
         NNCli_LogError("a_option is NULL");
@@ -461,6 +468,7 @@ NNCli_Err_t NNCli_Init(const NNCli_Option_t *a_option)
     linenoiseSetCompletionCallback(completion);
     linenoiseSetHintsCallback(hints);
 
+    s_is_initialized = true;
     res = NN_CLI__SUCCESS;
 
 done:
