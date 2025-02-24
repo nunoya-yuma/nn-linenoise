@@ -276,4 +276,47 @@ TEST_F(NNCliTest, Run_Success)
 
 TEST_F(NNCliTest, Run_BeforeInit) { ASSERT_EQ(NNCli_Run(), NN_CLI__NOT_READY); }
 
+TEST_F(NNCliTest, Run_UpperLimitCommandLength)
+{
+    const NNCli_Command_t cmd = {
+        .m_func = TestCmdFunc,
+        .m_name = "test-cmd",
+        .m_options = "",
+        .m_help_msg = "test help msg",
+    };
+
+    ASSERT_EQ(NNCli_RegisterCommand(&cmd), NN_CLI__SUCCESS);
+
+    char filename[] = "/tmp/nncli_test_history_XXXXXX";
+    GenerateDummyHistoryFile(filename);
+    const NNCli_Option_t option = {
+        .m_enable_multi_line = true,
+        .m_show_key_codes = false,
+        .m_async =
+            {
+                .m_enabled = false,
+                .m_timeout = {.tv_sec = 0, .tv_usec = 0},
+            },
+        .m_history_filename = filename,
+    };
+
+    ASSERT_EQ(NNCli_Init(&option), NN_CLI__SUCCESS);
+
+    std::string cmd_option;
+
+    // Subtract 1 as "test-cmd" is already included
+    for (size_t i = 0; i < MAX_NUM_OF_WORDS_PER_COMMAND - 1; i++)
+    {
+        cmd_option += " arg" + std::to_string(i + 2);
+    }
+    std::string upper_limit_cmd = "test-cmd" + cmd_option + "\n";
+
+    DummyKeyboardInput(upper_limit_cmd.c_str());
+    ASSERT_EQ(NNCli_Run(), NN_CLI__SUCCESS);
+
+    std::string exeeding_upper_limit_cmd = "test-cmd" + cmd_option + " arg\n";
+    DummyKeyboardInput(exeeding_upper_limit_cmd.c_str());
+    ASSERT_EQ(NNCli_Run(), NN_CLI__EXCEED_CAPACITY);
+}
+
 }  // namespace testing
