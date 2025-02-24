@@ -221,6 +221,28 @@ TEST_F(NNCliTest, Init_InvalidArgs)
     ASSERT_EQ(NNCli_Init(&option), NN_CLI__INVALID_ARGS);
 }
 
+TEST_F(NNCliTest, Init_CallTwice)
+{
+    char filename[] = "/tmp/nncli_test_history_XXXXXX";
+    GenerateDummyHistoryFile(filename);
+    const NNCli_Option_t option = {
+        .m_enable_multi_line = true,
+        .m_show_key_codes = false,
+        .m_async =
+            {
+                .m_enabled = false,
+                .m_timeout = {.tv_sec = 0, .tv_usec = 0},
+            },
+        .m_history_filename = filename,
+    };
+
+    ASSERT_EQ(NNCli_Init(&option), NN_CLI__SUCCESS);
+    free(s_history_filename);
+    s_history_filename = nullptr;
+
+    ASSERT_EQ(NNCli_Init(&option), NN_CLI__IN_PROGRESS);
+}
+
 TEST_F(NNCliTest, Run_Success)
 {
     const NNCli_Command_t cmd = {
