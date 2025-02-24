@@ -55,6 +55,7 @@ class NNCliTest : public ::testing::Test
     {
         s_async = {0};
         s_command_list = {0};
+        s_is_initialized = false;
         if (s_history_filename != nullptr)
         {
             free(s_history_filename);
