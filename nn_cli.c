@@ -107,12 +107,21 @@ static NNCli_Err_t SplitStringWithSpace(const char *a_raw_command,
                          "out_tokens is NULL");
 
     static char strCopy[COMMAND_STRING_MAX_LEN];
-    strncpy(strCopy, a_raw_command, sizeof(strCopy) - 1);
-    strCopy[sizeof(strCopy) - 1] = '\0';
-
     int token_count = 0;
     char *context = NULL;
-    char *token = strtok_r(strCopy, " ", &context);
+    char *token;
+
+    if (strlen(a_raw_command) > COMMAND_STRING_MAX_LEN - 1)
+    {
+        NNCli_LogError(
+            "The length of the command exceeds the maximum limit: %d",
+            COMMAND_STRING_MAX_LEN);
+        res = NN_CLI__EXCEED_CAPACITY;
+        goto done;
+    }
+    strncpy(strCopy, a_raw_command, sizeof(strCopy) - 1);
+    strCopy[sizeof(strCopy) - 1] = '\0';
+    token = strtok_r(strCopy, " ", &context);
 
     while (token != NULL)
     {
