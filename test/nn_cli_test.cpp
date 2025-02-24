@@ -55,6 +55,11 @@ class NNCliTest : public ::testing::Test
     {
         s_async = {0};
         s_command_list = {0};
+        if (s_history_filename != nullptr)
+        {
+            free(s_history_filename);
+            s_history_filename = nullptr;
+        }
     }
 };
 
@@ -198,7 +203,6 @@ TEST_F(NNCliTest, Init_Success)
     };
 
     ASSERT_EQ(NNCli_Init(&option), NN_CLI__SUCCESS);
-    free(s_history_filename);
 }
 
 TEST_F(NNCliTest, Init_InvalidArgs)

@@ -431,6 +431,8 @@ NNCli_Err_t NNCli_Init(const NNCli_Option_t *a_option)
         s_async = a_option->m_async;
     }
 
+    NNCli_AssertOrReturn(s_history_filename == NULL, NN_CLI__GENERAL_ERROR,
+                         "s_history_filename is not NULL");
     // This is not released by free() until the end, because it is used to save
     // the command each time.
     s_history_filename =
