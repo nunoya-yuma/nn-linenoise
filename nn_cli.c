@@ -106,27 +106,46 @@ static int SplitStringWithSpace(const char *a_raw_command, char **out_tokens)
     strncpy(strCopy, a_raw_command, sizeof(strCopy) - 1);
     strCopy[sizeof(strCopy) - 1] = '\0';
 
-    int tokenCount = 0;
+    int token_count = 0;
     char *context = NULL;
     char *token = strtok_r(strCopy, " ", &context);
 
-    while (token != NULL && tokenCount < MAX_NUM_OF_WORDS_PER_COMMAND)
+    while (token != NULL)
     {
-        out_tokens[tokenCount++] = token;
+        if (token_count == MAX_NUM_OF_WORDS_PER_COMMAND)
+        {
+            NNCli_LogError(
+                "The number of words in the command exceeds the "
+                "maximum limit: %d",
+                MAX_NUM_OF_WORDS_PER_COMMAND);
+            // strCopy has more commands, and the number of tokens is greater
+            // than MAX_NUM_OF_WORDS_PER_COMMAND, so add the number of tokens
+            // and exit from this function.
+            token_count++;
+            break;
+        }
+        out_tokens[token_count++] = token;
         token = strtok_r(NULL, " ", &context);
     }
 
-    return tokenCount;
+    return token_count;
 }
 
-static void CallRegisteredCommand(const char *a_command)
+static NNCli_Err_t CallRegisteredCommand(const char *a_command)
 {
-    NNCli_AssertOrReturnVoid(a_command, "a_command is NULL");
+    NNCli_Err_t res = NN_CLI__INVALID_ARGS;
+    NNCli_AssertOrReturn(a_command, res, "a_command is NULL");
 
     for (int i = 0; i < s_command_list.m_num; i++)
     {
         char *args[MAX_NUM_OF_WORDS_PER_COMMAND];
         int argc = SplitStringWithSpace(a_command, args);
+        if (argc > MAX_NUM_OF_WORDS_PER_COMMAND)
+        {
+            res = NN_CLI__EXCEED_CAPACITY;
+            goto done;
+        }
+
         const char *first_command = args[0];
         if (strcmp(first_command, s_command_list.m_command[i]->m_name) == 0)
         {
@@ -137,12 +156,17 @@ static void CallRegisteredCommand(const char *a_command)
                               s_command_list.m_command[i]->m_name,
                               s_command_list.m_command[i]->m_help_msg);
             }
-            return;
+            res = NN_CLI__SUCCESS;
+            goto done;
         }
     }
 
-    // If the command is found, return above and do not come here.
+    // If the command is found, this function will be exited before this line.
     NNCli_LogError("Command not found");
+    res = NN_CLI__SUCCESS;  // This is not an error.
+
+done:
+    return res;
 }
 
 static NNCli_Err_t GetInputAsync(char **out_string)
@@ -512,10 +536,13 @@ NNCli_Err_t NNCli_Run(void)
     /* Do something with the string. */
     if (line[0] != '\0')
     {
-        CallRegisteredCommand(line);
-        linenoiseHistoryAdd(line); /* Add to the history. */
-        linenoiseHistorySave(
-            s_history_filename); /* Save the history on disk. */
+        err = CallRegisteredCommand(line);
+        if (err == NN_CLI__SUCCESS)
+        {
+            linenoiseHistoryAdd(line); /* Add to the history. */
+            linenoiseHistorySave(
+                s_history_filename); /* Save the history on disk. */
+        }
     }
     free(line);
 
