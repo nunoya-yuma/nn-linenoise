@@ -97,10 +97,14 @@ static char *hints(const char *buf, int *color, int *bold)
     return option_str;
 }
 
-static int SplitStringWithSpace(const char *a_raw_command, char **out_tokens)
+static NNCli_Err_t SplitStringWithSpace(const char *a_raw_command,
+                                        char **out_tokens, int *out_token_count)
 {
-    NNCli_AssertOrReturn(a_raw_command, -1, "a_raw_command is NULL");
-    NNCli_AssertOrReturn(out_tokens, -1, "out_tokens is NULL");
+    NNCli_Err_t res = NN_CLI__INVALID_ARGS;
+    NNCli_AssertOrReturn(a_raw_command, NN_CLI__INVALID_ARGS,
+                         "a_raw_command is NULL");
+    NNCli_AssertOrReturn(out_tokens, NN_CLI__INVALID_ARGS,
+                         "out_tokens is NULL");
 
     static char strCopy[COMMAND_STRING_MAX_LEN];
     strncpy(strCopy, a_raw_command, sizeof(strCopy) - 1);
@@ -118,17 +122,18 @@ static int SplitStringWithSpace(const char *a_raw_command, char **out_tokens)
                 "The number of words in the command exceeds the "
                 "maximum limit: %d",
                 MAX_NUM_OF_WORDS_PER_COMMAND);
-            // strCopy has more commands, and the number of tokens is greater
-            // than MAX_NUM_OF_WORDS_PER_COMMAND, so add the number of tokens
-            // and exit from this function.
-            token_count++;
-            break;
+            res = NN_CLI__EXCEED_CAPACITY;
+            goto done;
         }
         out_tokens[token_count++] = token;
         token = strtok_r(NULL, " ", &context);
     }
 
-    return token_count;
+    *out_token_count = token_count;
+    res = NN_CLI__SUCCESS;
+
+done:
+    return res;
 }
 
 static NNCli_Err_t CallRegisteredCommand(const char *a_command)
@@ -139,10 +144,10 @@ static NNCli_Err_t CallRegisteredCommand(const char *a_command)
     for (int i = 0; i < s_command_list.m_num; i++)
     {
         char *args[MAX_NUM_OF_WORDS_PER_COMMAND];
-        int argc = SplitStringWithSpace(a_command, args);
-        if (argc > MAX_NUM_OF_WORDS_PER_COMMAND)
+        int argc;
+        res = SplitStringWithSpace(a_command, args, &argc);
+        if (res != NN_CLI__SUCCESS)
         {
-            res = NN_CLI__EXCEED_CAPACITY;
             goto done;
         }
 
