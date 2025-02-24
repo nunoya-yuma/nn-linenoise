@@ -276,7 +276,7 @@ TEST_F(NNCliTest, Run_Success)
 
 TEST_F(NNCliTest, Run_BeforeInit) { ASSERT_EQ(NNCli_Run(), NN_CLI__NOT_READY); }
 
-TEST_F(NNCliTest, Run_UpperLimitCommandLength)
+TEST_F(NNCliTest, Run_WordLimitPerCommand)
 {
     const NNCli_Command_t cmd = {
         .m_func = TestCmdFunc,
