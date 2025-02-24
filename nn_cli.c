@@ -106,7 +106,7 @@ static NNCli_Err_t SplitStringWithSpace(const char *a_raw_command,
     NNCli_AssertOrReturn(out_tokens, NN_CLI__INVALID_ARGS,
                          "out_tokens is NULL");
 
-    static char strCopy[COMMAND_STRING_MAX_LEN];
+    static char str_copy[COMMAND_STRING_MAX_LEN];
     int token_count = 0;
     char *context = NULL;
     char *token;
@@ -119,9 +119,9 @@ static NNCli_Err_t SplitStringWithSpace(const char *a_raw_command,
         res = NN_CLI__EXCEED_CAPACITY;
         goto done;
     }
-    strncpy(strCopy, a_raw_command, sizeof(strCopy) - 1);
-    strCopy[sizeof(strCopy) - 1] = '\0';
-    token = strtok_r(strCopy, " ", &context);
+    strncpy(str_copy, a_raw_command, sizeof(str_copy) - 1);
+    str_copy[sizeof(str_copy) - 1] = '\0';
+    token = strtok_r(str_copy, " ", &context);
 
     while (token != NULL)
     {
