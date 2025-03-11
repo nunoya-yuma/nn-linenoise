@@ -1,4 +1,5 @@
 #include "nn_cli.h"
+#include <unistd.h>
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -184,6 +185,9 @@ done:
 }
 
 static NNCli_Err_t GetInputAsync(char **out_string)
+    if (!isatty(STDIN_FILENO)) {
+        return GetInputSync(out_string);
+    }
 {
     /* Asynchronous mode using the multiplexing API: wait for
      * data on stdin, and simulate async data coming from some source
