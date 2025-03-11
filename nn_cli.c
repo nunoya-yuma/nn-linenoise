@@ -1,4 +1,5 @@
 #include "nn_cli.h"
+#include <unistd.h>
 
 #include <stdbool.h>
 #include <stdio.h>
