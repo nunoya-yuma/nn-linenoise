@@ -30,7 +30,7 @@ cmake -B build -S. -GNinja
 cmake --build build
 
 # Run
-./build/test/nn_cli_test
+./build/tests/nn_cli_test
 ```
 
 ## Try integration test
@@ -42,12 +42,12 @@ sudo apt update
 sudo apt install -y python3 python3-venv python3-pip
 python3 -m venv venv
 source venv/bin/activate
-pip install -r test/integration/requirements.txt
+pip install -r tests/integration/requirements.txt
 ```
 
 ### Run tests
 
 ```shell
-cd test/
+cd tests/
 pytest -vs integration
 ```
