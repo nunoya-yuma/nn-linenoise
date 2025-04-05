@@ -28,12 +28,12 @@ target_include_directories(nn_cli
 
 add_library(linenoise_org
     STATIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/repo/linenoise.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/linenoise/repo/linenoise.c
 )
 
 target_include_directories(linenoise_org
     PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/repo/
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/linenoise/repo/
 )
 
 if(BUILD_TESTING)

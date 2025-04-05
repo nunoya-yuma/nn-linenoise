@@ -20,7 +20,7 @@ target_link_libraries(nn_cli_test
 
 target_include_directories(nn_cli_test
     PRIVATE
-    ../repo
+    ../third_party/linenoise/repo
     ../internal
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
