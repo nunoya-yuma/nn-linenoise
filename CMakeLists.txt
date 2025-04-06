@@ -9,23 +9,6 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL "${CMAKE_SOURCE_DIR}")
     option(BUILD_TESTING "Build the tests" ON)
 endif()
 
-add_library(nn_cli
-    STATIC
-    nn_cli.c
-)
-
-target_link_libraries(nn_cli
-    PRIVATE
-    linenoise_org
-)
-
-target_include_directories(nn_cli
-    PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    PRIVATE
-    internal/
-)
-
 add_library(linenoise_org
     STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/linenoise/repo/linenoise.c
@@ -35,6 +18,8 @@ target_include_directories(linenoise_org
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/linenoise/repo/
 )
+
+add_subdirectory(src)
 
 if(BUILD_TESTING)
     add_subdirectory(tests)
